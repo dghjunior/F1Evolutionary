@@ -63,14 +63,16 @@ final_gear_red = 7
 #tenth_ratio
 
 
-creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+#TODO
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
+#TODO
 toolbox.register("attr_float", random.uniform, -5, 5)
 
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 3)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 51)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
@@ -98,17 +100,10 @@ toolbox.decorate("mutate", checkBounds(-5, 5))
 def main():
     random.seed(64)
 
-    MU, LAMBDA = 50, 100
-    pop = toolbox.population(n=MU)
-    hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean, axis=0)
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
 
-    algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
-                              cxpb=0.5, mutpb=0.2, ngen=150, 
-                              stats=stats, halloffame=hof)
-
-    return pop, stats, hof
+    return stats
