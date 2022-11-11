@@ -13,86 +13,56 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+import array
+import logging
 import random
 
 import numpy
 
 from deap import algorithms
 from deap import base
+from deap import benchmarks
 from deap import creator
 from deap import tools
 
-IND_INIT_SIZE = 5
-MAX_ITEM = 50
-MAX_WEIGHT = 50
-NBR_ITEMS = 20
-
-# To assure reproducibility, the RNG seed is set prior to the items
-# dict initialization. It is also seeded in main().
-random.seed(64)
-
-# Create the item dictionary: item name is an integer, and value is 
-# a (weight, value) 2-tuple.
-items = {}
-# Create random items and store them in the items' dictionary.
-for i in range(NBR_ITEMS):
-    items[i] = (random.randint(1, 10), random.uniform(0, 100))
-
-creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
-creator.create("Individual", set, fitness=creator.Fitness)
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("attr_item", random.randrange, NBR_ITEMS)
+toolbox.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, 
-    toolbox.attr_item, IND_INIT_SIZE)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 3)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-def evalKnapsack(individual):
-    weight = 0.0
-    value = 0.0
-    for item in individual:
-        weight += items[item][0]
-        value += items[item][1]
-    if len(individual) > MAX_ITEM or weight > MAX_WEIGHT:
-        return 10000, 0             # Ensure overweighted bags are dominated
-    return weight, value
+def checkBounds(min, max):
+    def decorator(func):
+        def wrappper(*args, **kargs):
+            offspring = func(*args, **kargs)
+            for child in offspring:
+                for i in range(len(child)):
+                    if child[i] > max:
+                        child[i] = max
+                    elif child[i] < min:
+                        child[i] = min
+            return offspring
+        return wrappper
+    return decorator
 
-def cxSet(ind1, ind2):
-    """Apply a crossover operation on input sets. The first child is the
-    intersection of the two sets, the second child is the difference of the
-    two sets.
-    """
-    temp = set(ind1)                # Used in order to keep type
-    ind1 &= ind2                    # Intersection (inplace)
-    ind2 ^= temp                    # Symmetric Difference (inplace)
-    return ind1, ind2
-
-def mutSet(individual):
-    """Mutation that pops or add an element."""
-    if random.random() < 0.5:
-        if len(individual) > 0:     # We cannot pop from an empty set
-            individual.remove(random.choice(sorted(tuple(individual))))
-    else:
-        individual.add(random.randrange(NBR_ITEMS))
-    return individual,
-
-toolbox.register("evaluate", evalKnapsack)
-toolbox.register("mate", cxSet)
-toolbox.register("mutate", mutSet)
+toolbox.register("evaluate", benchmarks.kursawe)
+toolbox.register("mate", tools.cxBlend, alpha=1.5)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=3, indpb=0.3)
 toolbox.register("select", tools.selNSGA2)
+
+toolbox.decorate("mate", checkBounds(-5, 5))
+toolbox.decorate("mutate", checkBounds(-5, 5)) 
 
 def main():
     random.seed(64)
-    NGEN = 50
-    MU = 50
-    LAMBDA = 100
-    CXPB = 0.7
-    MUTPB = 0.2
 
+    MU, LAMBDA = 50, 100
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -101,10 +71,19 @@ def main():
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
 
-    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
-                              halloffame=hof)
+    algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
+                              cxpb=0.5, mutpb=0.2, ngen=150, 
+                              stats=stats, halloffame=hof)
 
     return pop, stats, hof
 
 if __name__ == "__main__":
-    main()                 
+    pop, stats, hof = main()
+
+    # import matplotlib.pyplot as plt
+    # import numpy
+    # 
+    # front = numpy.array([ind.fitness.values for ind in pop])
+    # plt.scatter(front[:,0], front[:,1], c="b")
+    # plt.axis("tight")
+    # plt.show()
