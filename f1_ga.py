@@ -62,14 +62,20 @@ final_gear_red = 7
 #ninth_ratio
 #tenth_ratio
 
+#TODO-DANIEL
 def evalLapTime():
     return 0.0
 
+#TODO-ANDY
 def cxIntermediate(ratio):
     return 0.0
 
+#TODO-DANIEL
 def mutationAdaptFeasible():
     return 0.0
+
+#TODO-DANIEL
+# Write island model stuff
 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -77,9 +83,10 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
-#TODO
+#TODO fix gene representation
 toolbox.register("attr_float", random.uniform, -5, 5)
 
+#TODO add new genes for individual representation
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 51)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -99,6 +106,7 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
+    #TODO-DANIEL check mutation probability
     algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
 
     return pop, stats, hof
