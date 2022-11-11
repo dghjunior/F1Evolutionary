@@ -11,20 +11,20 @@ from deap import tools
 name = 'Formula 1 2022'
 type = 'Open Wheel'
 mass = 798 #kg
-#frontal_mass
-#wheelbase
+#frontal_mass = [0.445, 0.540]
+#wheelbase = [3460mm, 3600mm]
 steering_ratio = 10
-#lift_coef
-#drag_coef
+#lift_coef = [-4.4, -2.8]
+#drag_coef = [-1.1, --0.7]
 cl_mult = 1
 cd_mult = 1
-#aero_dist
-#frontal_area
+#aero_dist = [0.5, 0.7]
+#frontal_area = [0.9m2, 1.4m2]
 air_density = 1.225 #kg/m3
-#disc_diameter
-#pad_height
+#disc_diameter = [325mm, 330mm]
+#pad_height = [52mm, 52.8mm]
 pad_friction = 0.45
-#caliper_num_pistons
+#caliper_num_pistons = [1, 6]
 caliper_piston_d = 52 #mm
 master_cyl_d = 32.5 #mm
 pedal_ratio = 4
@@ -37,8 +37,8 @@ long_fric_sens = 0.0001
 lat_fric_coef = 2
 lat_load_rating = 300 #kg
 lat_fric_sens = 0.0001
-#front_stiffness
-#rear_stiffness
+#front_stiffness = [800, 1200]
+#rear_stiffness = [800, 1200]
 power_mult = 1
 thermal_eff = 0.35
 fuel_heating_value = 47200000 #J/kg
@@ -49,14 +49,14 @@ final_gear_eff = 0.92
 gearbox_eff = 0.98
 primary_gear_red = 1
 final_gear_red = 7
-#first_ratio
-#second_ratio
-#third_ratio
-#fourth_ratio
-#fifth_fatio
-#sixth_ratio
-#seventh_ratio
-#eighth_ratio
+#first_ratio = [2, 3]
+#second_ratio = [Prev*0.7, Prev*0.9]
+#third_ratio = [Prev*0.7, Prev*0.9]
+#fourth_ratio = [Prev*0.7, Prev*0.9]
+#fifth_fatio = [Prev*0.7, Prev*0.9]
+#sixth_ratio = [Prev*0.7, Prev*0.9]
+#seventh_ratio = [Prev*0.7, Prev*0.9]
+#eighth_ratio = [Prev*0.7, Prev*0.9]
 
 #empty
 #ninth_ratio
