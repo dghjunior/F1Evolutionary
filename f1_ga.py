@@ -137,7 +137,7 @@ def cxIntermediate(ratio):
     return 0.0
 
 #TODO-DANIEL add loop for individual genes and bounds
-def mutationAdaptFeasible():
+def mutationpower():
     lb = 5
     ub = 100
     gene = 60
@@ -160,20 +160,56 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 toolbox = base.Toolbox()
 
 #TODO fix gene representation
-toolbox.register("attr_float", random.uniform, -5, 5)
+toolbox.register('frontal_mass', random.uniform, 0.445, 0.540)
+toolbox.register('wheelbase', random.randint, 3460, 3600)
+toolbox.register('lift_coef', random.uniform, -4.4, -2.8)
+toolbox.register('drag_coef', random.uniform, -1.1, -0.7)
+toolbox.register('aero_dist', random.uniform, 0.5, 0.7)
+toolbox.register('frontal_area', random.uniform, 0.9, 1.4)
+toolbox.register('disc_diameter', random.randint, 325, 330)
+toolbox.register('pad_height', random.uniform, 52, 52.8)
+toolbox.register('caliper_num_pistons', random.randint, 1, 6)
+toolbox.register('front_stiffness', random.randint, 800, 1200)
+toolbox.register('rear_stiffness', random.randint, 800, 1200)
+toolbox.register('first_ratio', random.uniform, 2, 3)
+toolbox.register('second_ratio', random.uniform, 1.75, 2.2)
+toolbox.register('third_ratio', random.uniform, 1.5, 1.9)
+toolbox.register('fourth_ratio', random.uniform, 1.2, 1.6)
+toolbox.register('fifth_ratio', random.uniform, 1.15, 1.4)
+toolbox.register('sixth_ratio', random.uniform, 1.05, 1.25)
+toolbox.register('seventh_ratio', random.uniform, 0.9, 1.15)
+toolbox.register('eight_ratio', random.uniform, 0.75, 1)
 
 #TODO add new genes for individual representation
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 51)
+toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.frontal_mass,
+    toolbox.wheelbase,
+    toolbox.lift_coef,
+    toolbox.drag_coef,
+    toolbox.aero_dist,
+    toolbox.frontal_area,
+    toolbox.disc_diameter,
+    toolbox.pad_height,
+    toolbox.caliper_num_pistons,
+    toolbox.front_stiffness,
+    toolbox.rear_stiffness,
+    toolbox.first_ratio,
+    toolbox.second_ratio,
+    toolbox.third_ratio,
+    toolbox.fourth_ratio,
+    toolbox.fifth_ratio,
+    toolbox.sixth_ratio,
+    toolbox.seventh_ratio,
+    toolbox.eight_ratio),
+    n=1
+)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
 toolbox.register("evaluate", evalLapTime)
 toolbox.register("mate", cxIntermediate, ratio = 0.8)
-toolbox.register("mutate", mutationAdaptFeasible)
+toolbox.register("mutate", mutationpower)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
 def main():
     random.seed()
-    mutationAdaptFeasible()
 
     pop = toolbox.population(n=30)
     hof = tools.HallOfFame(3)
