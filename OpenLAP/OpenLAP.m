@@ -34,210 +34,214 @@
 %
 % April 2020.
 
-%% Clearing memory
+function laptime = OpenLAP()
+    %% Clearing memory
 
-clear
-clc
-close all force
-diary('off')
-fclose('all') ;
+    clear
+    clc
+    close all force
+    diary('off')
+    fclose('all') ;
 
-%% Starting timer
+    %% Starting timer
 
-tic
+    tic
 
-%% Filenames
+    %% Filenames
 
-trackfile = 'OpenTRACK Tracks/OpenTRACK_Spa-Francorchamps_Closed_Forward.mat' ;
-vehiclefile = 'OpenVEHICLE Vehicles/OpenVEHICLE_Formula 1_Open Wheel.mat' ;
+    trackfile = 'OpenTRACK Tracks/OpenTRACK_Spa-Francorchamps_Closed_Forward.mat' ;
+    vehiclefile = 'OpenVEHICLE Vehicles/OpenVEHICLE_Formula 1_Open Wheel.mat' ;
 
-%% Loading circuit
+    %% Loading circuit
 
-tr = load(trackfile) ;
+    tr = load(trackfile) ;
 
-%% Loading car
+    %% Loading car
 
-veh = load(vehiclefile) ;
+    veh = load(vehiclefile) ;
 
-%% Export frequency
+    %% Export frequency
 
-freq = 50 ; % [Hz]
+    freq = 50 ; % [Hz]
 
-%% Simulation name
+    %% Simulation name
 
-use_date_time_in_name = false ;
-if use_date_time_in_name
-    date_time = "_"+datestr(now,'yyyy_mm_dd')+"_"+datestr(now,'HH_MM_SS') ; %#ok<UNRCH>
-else
-    date_time = "" ;
+    use_date_time_in_name = false ;
+    if use_date_time_in_name
+        date_time = "_"+datestr(now,'yyyy_mm_dd')+"_"+datestr(now,'HH_MM_SS') ; %#ok<UNRCH>
+    else
+        date_time = "" ;
+    end
+    simname = "OpenLAP Sims/OpenLAP_"+char(veh.name)+"_"+tr.info.name+date_time ;
+    logfile = simname+".log" ;
+
+    %% HUD
+
+    [folder_status,folder_msg] = mkdir('OpenLAP Sims') ;
+    delete(simname+".log") ;
+    logid = fopen(logfile,'w') ;
+    %disp_logo(logid)
+    %disp('=================================================')
+    %disp("Vehicle: "+veh.name)
+    %disp("Track:   "+tr.info.name)
+    %disp("Date:    "+datestr(now,'dd/mm/yyyy'))
+    %disp("Time:    "+datestr(now,'HH:MM:SS'))
+    %disp('=================================================')
+    %fprintf(logid,'%s\n','=================================================') ;
+    %fprintf(logid,'%s\n',"Vehicle: "+veh.name) ;
+    %fprintf(logid,'%s\n',"Track:   "+tr.info.name) ;
+    %fprintf(logid,'%s\n',"Date:    "+datestr(now,'dd/mm/yyyy')) ;
+    %fprintf(logid,'%s\n',"Time:    "+datestr(now,'HH:MM:SS')) ;
+    %fprintf(logid,'%s\n','=================================================') ;
+
+    %% Lap Simulation
+
+    [sim] = simulate(veh,tr,simname,logid) ;
+
+    %% %displaying laptime
+
+    %disp(['Laptime:  ',num2str(sim.laptime.data,'%3.3f'),' [s]'])
+    laptime = num2str(sim.laptime.data,'%3.3f');
+    %fprintf(logid,'%s','Laptime   : ') ;
+    %fprintf(logid,'%7.3f',sim.laptime.data) ;
+    %fprintf(logid,'%s\n',' [s]') ;
+    for i=1:max(tr.sector)
+        %disp(['Sector ',num2str(i),': ',num2str(sim.sector_time.data(i),'%3.3f'),' [s]'])
+        %fprintf(logid,'%s','Sector ') ;
+        %fprintf(logid,'%3d',i) ;
+        %fprintf(logid,'%s',': ') ;
+        %fprintf(logid,'%7.3f',sim.sector_time.data(i)) ;
+        %fprintf(logid,'%s\n',' [s]') ;
+    end
+
+    %% Ploting results
+
+    % figure window
+    set(0,'units','pixels') ;
+    SS = get(0,'screensize') ;
+    H = 900-90 ;
+    W = 900 ;
+    Xpos = floor((SS(3)-W)/2) ;
+    Ypos = floor((SS(4)-H)/2) ;
+    f = figure('Name','OpenLAP Simulation Results','Position',[Xpos,Ypos,W,H]) ;
+    figname = ["OpenLAP: "+char(veh.name)+" @ "+tr.info.name,"Date & Time: "+datestr(now,'yyyy/mm/dd')+" "+datestr(now,'HH:MM:SS')] ;
+    sgtitle(figname)
+
+    % setting rows & columns
+    rows = 7 ;
+    cols = 2 ;
+    % x axis limits
+    xlimit = [tr.x(1),tr.x(end)] ;
+    % xlimit = [4000,4500] ;
+    % setting legend location
+    loc = 'east' ;
+
+    % speed
+    subplot(rows,cols,[1,2])
+    hold on
+    plot(tr.x,sim.speed.data*3.6)
+    legend({'Speed'},'Location',loc)
+    xlabel('Distance [m]')
+    xlim(xlimit)
+    ylabel('Speed [m/s]')
+    ylabel('Speed [km/h]')
+    grid on
+
+    % elevation and curvature
+    subplot(rows,cols,[3,4])
+    yyaxis left
+    plot(tr.x,tr.Z)
+    xlabel('Distance [m]')
+    xlim(xlimit)
+    ylabel('Elevation [m]')
+    grid on
+    yyaxis right
+    plot(tr.x,tr.r)
+    legend({'Elevation','Curvature'},'Location',loc)
+    ylabel('Curvature [m^-^1]')
+
+    % accelerations
+    subplot(rows,cols,[5,6])
+    hold on
+    plot(tr.x,sim.long_acc.data)
+    plot(tr.x,sim.lat_acc.data)
+    plot(tr.x,sim.sum_acc.data,'k:')
+    legend({'LonAcc','LatAcc','GSum'},'Location',loc)
+    xlabel('Distance [m]')
+    xlim(xlimit)
+    ylabel('Acceleration [m/s^2]')
+    grid on
+
+    % drive inputs
+    subplot(rows,cols,[7,8])
+    hold on
+    plot(tr.x,sim.throttle.data*100)
+    plot(tr.x,sim.brake_pres.data/10^5)
+    legend({'tps','bps'},'Location',loc)
+    xlabel('Distance [m]')
+    xlim(xlimit)
+    ylabel('input [%]')
+    grid on
+    ylim([-10,110])
+
+    % steering inputs
+    subplot(rows,cols,[9,10])
+    hold on
+    plot(tr.x,sim.steering.data)
+    plot(tr.x,sim.delta.data)
+    plot(tr.x,sim.beta.data)
+    legend({'Steering wheel','Steering \delta','Vehicle slip angle \beta'},'Location',loc)
+    xlabel('Distance [m]')
+    xlim(xlimit)
+    ylabel('angle [deg]')
+    grid on
+
+    % ggv circle
+    subplot(rows,cols,[11,13])
+    hold on
+    scatter3(sim.lat_acc.data,sim.long_acc.data,sim.speed.data*3.6,50,'ro','filled','MarkerEdgeColor',[0,0,0])
+    surf(veh.GGV(:,:,2),veh.GGV(:,:,1),veh.GGV(:,:,3)*3.6,'EdgeAlpha',0.3,'FaceAlpha',0.8)
+    legend('OpenLAP','GGV','Location','northeast')
+    xlabel('LatAcc [m/s^2]')
+    ylabel('LonAcc [m/s^2]')
+    zlabel('Speed [km/h]')
+    grid on
+    set(gca,'DataAspectRatio',[1 1 3])
+    axis tight
+
+    % track map
+    subplot(rows,cols,[12,14])
+    hold on
+    scatter(tr.X,tr.Y,5,sim.speed.data*3.6)
+    plot(tr.arrow(:,1),tr.arrow(:,2),'k','LineWidth',2)
+    legend('Track Map','Location','northeast')
+    xlabel('X [m]')
+    ylabel('Y [m]')
+    colorbar
+    grid on
+    axis equal
+
+    % saving figure
+    savefig(simname+".fig")
+
+    % HUD
+    %disp('Plots created and saved.')
+    %fprintf(logid,'%s\n','Plots created and saved.') ;
+
+    %% Report generation
+
+    % csv report generation
+    export_report(veh,tr,sim,freq,logid) ;
+    % saving .mat file
+    save(simname+".mat",'veh','tr','sim')
+    % HUD
+    toc
+    %fprintf(logid,'%s','Elapsed time is: ') ;
+    %fprintf(logid,'%f',toc) ;
+    %fprintf(logid,'%s\n',' [s]') ;
+    fclose('all') ;
+
 end
-simname = "OpenLAP Sims/OpenLAP_"+char(veh.name)+"_"+tr.info.name+date_time ;
-logfile = simname+".log" ;
-
-%% HUD
-
-[folder_status,folder_msg] = mkdir('OpenLAP Sims') ;
-delete(simname+".log") ;
-logid = fopen(logfile,'w') ;
-disp_logo(logid)
-disp('=================================================')
-disp("Vehicle: "+veh.name)
-disp("Track:   "+tr.info.name)
-disp("Date:    "+datestr(now,'dd/mm/yyyy'))
-disp("Time:    "+datestr(now,'HH:MM:SS'))
-disp('=================================================')
-fprintf(logid,'%s\n','=================================================') ;
-fprintf(logid,'%s\n',"Vehicle: "+veh.name) ;
-fprintf(logid,'%s\n',"Track:   "+tr.info.name) ;
-fprintf(logid,'%s\n',"Date:    "+datestr(now,'dd/mm/yyyy')) ;
-fprintf(logid,'%s\n',"Time:    "+datestr(now,'HH:MM:SS')) ;
-fprintf(logid,'%s\n','=================================================') ;
-
-%% Lap Simulation
-
-[sim] = simulate(veh,tr,simname,logid) ;
-
-%% Displaying laptime
-
-disp(['Laptime:  ',num2str(sim.laptime.data,'%3.3f'),' [s]'])
-fprintf(logid,'%s','Laptime   : ') ;
-fprintf(logid,'%7.3f',sim.laptime.data) ;
-fprintf(logid,'%s\n',' [s]') ;
-for i=1:max(tr.sector)
-    disp(['Sector ',num2str(i),': ',num2str(sim.sector_time.data(i),'%3.3f'),' [s]'])
-    fprintf(logid,'%s','Sector ') ;
-    fprintf(logid,'%3d',i) ;
-    fprintf(logid,'%s',': ') ;
-    fprintf(logid,'%7.3f',sim.sector_time.data(i)) ;
-    fprintf(logid,'%s\n',' [s]') ;
-end
-
-%% Ploting results
-
-% figure window
-set(0,'units','pixels') ;
-SS = get(0,'screensize') ;
-H = 900-90 ;
-W = 900 ;
-Xpos = floor((SS(3)-W)/2) ;
-Ypos = floor((SS(4)-H)/2) ;
-f = figure('Name','OpenLAP Simulation Results','Position',[Xpos,Ypos,W,H]) ;
-figname = ["OpenLAP: "+char(veh.name)+" @ "+tr.info.name,"Date & Time: "+datestr(now,'yyyy/mm/dd')+" "+datestr(now,'HH:MM:SS')] ;
-sgtitle(figname)
-
-% setting rows & columns
-rows = 7 ;
-cols = 2 ;
-% x axis limits
-xlimit = [tr.x(1),tr.x(end)] ;
-% xlimit = [4000,4500] ;
-% setting legend location
-loc = 'east' ;
-
-% speed
-subplot(rows,cols,[1,2])
-hold on
-plot(tr.x,sim.speed.data*3.6)
-legend({'Speed'},'Location',loc)
-xlabel('Distance [m]')
-xlim(xlimit)
-ylabel('Speed [m/s]')
-ylabel('Speed [km/h]')
-grid on
-
-% elevation and curvature
-subplot(rows,cols,[3,4])
-yyaxis left
-plot(tr.x,tr.Z)
-xlabel('Distance [m]')
-xlim(xlimit)
-ylabel('Elevation [m]')
-grid on
-yyaxis right
-plot(tr.x,tr.r)
-legend({'Elevation','Curvature'},'Location',loc)
-ylabel('Curvature [m^-^1]')
-
-% accelerations
-subplot(rows,cols,[5,6])
-hold on
-plot(tr.x,sim.long_acc.data)
-plot(tr.x,sim.lat_acc.data)
-plot(tr.x,sim.sum_acc.data,'k:')
-legend({'LonAcc','LatAcc','GSum'},'Location',loc)
-xlabel('Distance [m]')
-xlim(xlimit)
-ylabel('Acceleration [m/s^2]')
-grid on
-
-% drive inputs
-subplot(rows,cols,[7,8])
-hold on
-plot(tr.x,sim.throttle.data*100)
-plot(tr.x,sim.brake_pres.data/10^5)
-legend({'tps','bps'},'Location',loc)
-xlabel('Distance [m]')
-xlim(xlimit)
-ylabel('input [%]')
-grid on
-ylim([-10,110])
-
-% steering inputs
-subplot(rows,cols,[9,10])
-hold on
-plot(tr.x,sim.steering.data)
-plot(tr.x,sim.delta.data)
-plot(tr.x,sim.beta.data)
-legend({'Steering wheel','Steering \delta','Vehicle slip angle \beta'},'Location',loc)
-xlabel('Distance [m]')
-xlim(xlimit)
-ylabel('angle [deg]')
-grid on
-
-% ggv circle
-subplot(rows,cols,[11,13])
-hold on
-scatter3(sim.lat_acc.data,sim.long_acc.data,sim.speed.data*3.6,50,'ro','filled','MarkerEdgeColor',[0,0,0])
-surf(veh.GGV(:,:,2),veh.GGV(:,:,1),veh.GGV(:,:,3)*3.6,'EdgeAlpha',0.3,'FaceAlpha',0.8)
-legend('OpenLAP','GGV','Location','northeast')
-xlabel('LatAcc [m/s^2]')
-ylabel('LonAcc [m/s^2]')
-zlabel('Speed [km/h]')
-grid on
-set(gca,'DataAspectRatio',[1 1 3])
-axis tight
-
-% track map
-subplot(rows,cols,[12,14])
-hold on
-scatter(tr.X,tr.Y,5,sim.speed.data*3.6)
-plot(tr.arrow(:,1),tr.arrow(:,2),'k','LineWidth',2)
-legend('Track Map','Location','northeast')
-xlabel('X [m]')
-ylabel('Y [m]')
-colorbar
-grid on
-axis equal
-
-% saving figure
-savefig(simname+".fig")
-
-% HUD
-disp('Plots created and saved.')
-fprintf(logid,'%s\n','Plots created and saved.') ;
-
-%% Report generation
-
-% csv report generation
-export_report(veh,tr,sim,freq,logid) ;
-% saving .mat file
-save(simname+".mat",'veh','tr','sim')
-% HUD
-toc
-fprintf(logid,'%s','Elapsed time is: ') ;
-fprintf(logid,'%f',toc) ;
-fprintf(logid,'%s\n',' [s]') ;
-fclose('all') ;
 
 %% Functions
 
@@ -250,8 +254,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     timer_solver_start = tic ;
     
     % HUD
-    disp('Simulation started.')
-    fprintf(logid,'%s\n','Simulation started.') ;
+    %disp('Simulation started.')
+    %fprintf(logid,'%s\n','Simulation started.') ;
     
     %% maximum speed curve (assuming pure lateral condition)
     
@@ -263,8 +267,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     end
     
     % HUD
-    disp('Maximum speed calculated at all points.')
-    fprintf(logid,'%s\n','Maximum speed calculated at all points.') ;
+    %disp('Maximum speed calculated at all points.')
+    %fprintf(logid,'%s\n','Maximum speed calculated at all points.') ;
     
     %% finding apexes
     
@@ -292,8 +296,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     bps_apex = bps_v_max(apex) ;
     
     % HUD
-    disp('Found all apexes on track.')
-    fprintf(logid,'%s\n','Found all apexes on track.') ;
+    %disp('Found all apexes on track.')
+    %fprintf(logid,'%s\n','Found all apexes on track.') ;
     
     %% simulation
     
@@ -310,18 +314,18 @@ function [sim] = simulate(veh,tr,simname,logid)
     bps = single(zeros(tr.n,N,2)) ;
     
     % HUD
-    disp('Starting acceleration and deceleration.')
-    fprintf(logid,'%s\n','Starting acceleration and deceleration.') ;
+    %disp('Starting acceleration and deceleration.')
+    %fprintf(logid,'%s\n','Starting acceleration and deceleration.') ;
     prg_size = 30 ;
     prg_pos = ftell(logid) ;
-    fprintf(['Running: [',repmat(' ',1,prg_size),'] '])
-    fprintf('% 3.0f',0)
-    fprintf(' [%%]')
-    fprintf(logid,'%s',['Running: [',repmat(' ',1,prg_size),'] ']) ;
-    fprintf(logid,'% 3.0f',0) ;
-    fprintf(logid,'%s\n',' [%]') ;
-    fprintf(logid,'________________________________________________\n') ;
-    fprintf(logid,'|_Apex__|_Point_|_Mode__|___x___|___v___|_vmax_|\n') ;
+    %fprintf(['Running: [',repmat(' ',1,prg_size),'] '])
+    %fprintf('% 3.0f',0)
+    %fprintf(' [%%]')
+    %fprintf(logid,'%s',['Running: [',repmat(' ',1,prg_size),'] ']) ;
+    %fprintf(logid,'% 3.0f',0) ;
+    %fprintf(logid,'%s\n',' [%]') ;
+    %fprintf(logid,'________________________________________________\n') ;
+    %fprintf(logid,'|_Apex__|_Point_|_Mode__|___x___|___v___|_vmax_|\n') ;
     
     % running simulation
     for i=1:N % apex number
@@ -361,7 +365,7 @@ function [sim] = simulate(veh,tr,simname,logid)
                 end
                 while 1
                     % writing to log file
-                    fprintf(logid,'%7d\t%7d\t%7d\t%7.1f\t%7.2f\t%7.2f\n',i,j,k,tr.x(j),v(j,i,k),v_max(j)) ;
+                    %fprintf(logid,'%7d\t%7d\t%7d\t%7.1f\t%7.2f\t%7.2f\n',i,j,k,tr.x(j),v(j,i,k),v_max(j)) ;
                     % calculating speed, accelerations and driver inputs from vehicle model
                     [v(j_next,i,k),ax(j,i,k),ay(j,i,k),tps(j,i,k),bps(j,i,k),overshoot] = vehicle_model_comb(veh,tr,v(j,i,k),v_max(j_next),j,mode) ;
                     % checking for limit
@@ -400,23 +404,23 @@ function [sim] = simulate(veh,tr,simname,logid)
     
     % HUD
     progress_bar(max(flag,[],2),prg_size,logid,prg_pos) ;
-    fprintf('\n')
-    disp('Velocity profile calculated.')
-    disp(['Solver time is: ',num2str(toc(timer_solver_start)),' [s]']) ;
-    disp('Post-processing initialised.')
-    fprintf(logid,'________________________________________________\n') ;
+    %fprintf('\n')
+    %disp('Velocity profile calculated.')
+    %disp(['Solver time is: ',num2str(toc(timer_solver_start)),' [s]']) ;
+    %disp('Post-processing initialised.')
+    %fprintf(logid,'________________________________________________\n') ;
     if sum(flag)<size(flag,1)/size(flag,2)
-        fprintf(logid,'%s\n','Velocity profile calculation error.') ;
-        fprintf(logid,'%s\n','Points not calculated.') ;
+        %fprintf(logid,'%s\n','Velocity profile calculation error.') ;
+        %fprintf(logid,'%s\n','Points not calculated.') ;
         p = (1:tr.n)' ;
-        fprintf(logid,'%d\n',p(min(flag,[],2))) ;
+        %fprintf(logid,'%d\n',p(min(flag,[],2))) ;
     else
-        fprintf(logid,'%s\n','Velocity profile calculated successfully.') ;
+        %fprintf(logid,'%s\n','Velocity profile calculated successfully.') ;
     end
-    fprintf(logid,'%s','Solver time is: ') ;
-    fprintf(logid,'%f',toc(timer_solver_start)) ;
-    fprintf(logid,'%s\n',' [s]') ;
-    fprintf(logid,'%s\n','Post-processing initialised.') ;
+    %fprintf(logid,'%s','Solver time is: ') ;
+    %fprintf(logid,'%f',toc(timer_solver_start)) ;
+    %fprintf(logid,'%s\n',' [s]') ;
+    %fprintf(logid,'%s\n','Post-processing initialised.') ;
     
     %% post-processing resutls
     
@@ -443,8 +447,8 @@ function [sim] = simulate(veh,tr,simname,logid)
         end
     end
     % HUD
-    disp('Correct solution selected from modes.')
-    fprintf(logid,'%s\n','Correct solution selected from modes.') ;
+    %disp('Correct solution selected from modes.')
+    %fprintf(logid,'%s\n','Correct solution selected from modes.') ;
     
     % laptime calculation
     if strcmp(tr.info.config,'Open')
@@ -458,8 +462,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     end
     laptime = time(end) ;
     % HUD
-    disp('Laptime calculated.')
-    fprintf(logid,'%s\n','Laptime calculated.') ;
+    %disp('Laptime calculated.')
+    %fprintf(logid,'%s\n','Laptime calculated.') ;
     
     % calculating forces
     M = veh.M ;
@@ -471,8 +475,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     Fx_aero = 1/2*veh.rho*veh.factor_Cd*veh.Cd*veh.A*V.^2 ;
     Fx_roll = veh.Cr*abs(Fz_total) ;
     % HUD
-    disp('Forces calculated.')
-    fprintf(logid,'%s\n','Forces calculated.') ;
+    %disp('Forces calculated.')
+    %fprintf(logid,'%s\n','Forces calculated.') ;
     
     % calculating yaw motion, vehicle slip angle and steering input
     yaw_rate = V.*tr.r ;
@@ -486,12 +490,12 @@ function [sim] = simulate(veh,tr,simname,logid)
     end
     steer = delta*veh.rack ;
     % HUD
-    disp('Yaw motion calculated.')
-    disp('Steering angles calculated.')
-    disp('Vehicle slip angles calculated.')
-    fprintf(logid,'%s\n','Yaw motion calculated.') ;
-    fprintf(logid,'%s\n','Steering angles calculated.') ;
-    fprintf(logid,'%s\n','Vehicle slip angles calculated.') ;
+    %disp('Yaw motion calculated.')
+    %disp('Steering angles calculated.')
+    %disp('Vehicle slip angles calculated.')
+    %fprintf(logid,'%s\n','Yaw motion calculated.') ;
+    %fprintf(logid,'%s\n','Steering angles calculated.') ;
+    %fprintf(logid,'%s\n','Vehicle slip angles calculated.') ;
     
     % calculating engine metrics
     wheel_torque = TPS.*interp1(veh.vehicle_speed,veh.wheel_torque,V,'linear','extrap') ;
@@ -503,8 +507,8 @@ function [sim] = simulate(veh,tr,simname,logid)
     fuel_cons = cumsum(wheel_torque/veh.tyre_radius.*tr.dx/veh.n_primary/veh.n_gearbox/veh.n_final/veh.n_thermal/veh.fuel_LHV) ;
     fuel_cons_total = fuel_cons(end) ;
     % HUD
-    disp('Engine metrics calculated.')
-    fprintf(logid,'%s\n','Engine metrics calculated.') ;
+    %disp('Engine metrics calculated.')
+    %fprintf(logid,'%s\n','Engine metrics calculated.') ;
     
     % calculating kpis
     percent_in_corners = sum(tr.r~=0)/tr.n*100 ;
@@ -530,10 +534,10 @@ function [sim] = simulate(veh,tr,simname,logid)
         sector_v_min(i) = min(V(tr.sector==i)) ;
     end
     % HUD
-    disp('KPIs calculated.')
-    disp('Post-processing finished.')
-    fprintf(logid,'%s\n','KPIs calculated.') ;
-    fprintf(logid,'%s\n','Post-processing finished.') ;
+    %disp('KPIs calculated.')
+    %disp('Post-processing finished.')
+    %fprintf(logid,'%s\n','KPIs calculated.') ;
+    %fprintf(logid,'%s\n','Post-processing finished.') ;
     
     %% saving results in sim structure
     sim.sim_name.data = simname ;
@@ -648,10 +652,10 @@ function [sim] = simulate(veh,tr,simname,logid)
     sim.sector_v_min.data = sector_v_min ;
     sim.sector_v_min.unit = 'm/s' ;
     % HUD
-    disp('Simulation results saved.')
-    disp('Simulation completed.')
-    fprintf(logid,'%s\n','Simulation results saved.') ;
-    fprintf(logid,'%s\n','Simulation completed.') ;
+    %disp('Simulation results saved.')
+    %disp('Simulation completed.')
+    %fprintf(logid,'%s\n','Simulation results saved.') ;
+    %fprintf(logid,'%s\n','Simulation completed.') ;
     
 end
 
@@ -971,20 +975,20 @@ function [] = progress_bar(flag,prg_size,logid,prg_pos)
     n = floor(p*prg_size) ; % new number of lines
     e = prg_size-n ; % number of spaces
     % updating progress bar in command window
-    fprintf(repmat('\b',1,prg_size+1+8)) % backspace to start of bar
-    fprintf(repmat('|',1,n)) % writing lines
-    fprintf(repmat(' ',1,e)) % writing spaces
-    fprintf(']') % closing bar
-    fprintf('%4.0f',p*100) % writing percentage
-    fprintf(' [%%]') % writing % symbol
+    %fprintf(repmat('\b',1,prg_size+1+8)) % backspace to start of bar
+    %fprintf(repmat('|',1,n)) % writing lines
+    %fprintf(repmat(' ',1,e)) % writing spaces
+    %fprintf(']') % closing bar
+    %fprintf('%4.0f',p*100) % writing percentage
+    %fprintf(' [%%]') % writing % symbol
     % updating progress bar in log file
     fseek(logid,prg_pos,'bof') ; % start of progress bar position in log file
-    fprintf(logid,'%s','Running: [') ;
-    fprintf(logid,'%s',repmat('|',1,n)) ;
-    fprintf(logid,'%s',repmat(' ',1,e)) ;
-    fprintf(logid,'%s','] ') ;
-    fprintf(logid,'%3.0f',p*100) ;
-    fprintf(logid,'%s\n',' [%]') ;
+    %fprintf(logid,'%s','Running: [') ;
+    %fprintf(logid,'%s',repmat('|',1,n)) ;
+    %fprintf(logid,'%s',repmat(' ',1,e)) ;
+    %fprintf(logid,'%s','] ') ;
+    %fprintf(logid,'%3.0f',p*100) ;
+    %fprintf(logid,'%s\n',' [%]') ;
     fseek(logid,0,'eof') ; % continue at end of file
 end
 
@@ -998,8 +1002,8 @@ function [] = disp_logo(logid)
         '\____/ _  .___/\___//_/ /_//_____/_/  |_/_/      ';...
         '       /_/                                       '...
         ] ;
-    disp(lg) % command window
-    fprintf(logid,'%s',[lg,repmat(newline,size(lg,1),1)].') ; % log file
+    %disp(lg) % command window
+    %fprintf(logid,'%s',[lg,repmat(newline,size(lg,1),1)].') ; % log file
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1059,41 +1063,41 @@ function [] = export_report(veh,tr,sim,freq,logid)
     end
     % opening and writing .csv file
     % HUD
-    disp('Export initialised.')
-    fprintf(logid,'%s\n','Export initialised.') ;
+    %disp('Export initialised.')
+    %fprintf(logid,'%s\n','Export initialised.') ;
     % filename
     filename = sim.sim_name.data+".csv" ;
     % opening file
     fid = fopen(filename,'w') ;
     % writing file header
-    fprintf(fid,'%s,%s\n',["Format","OpenLAP Export"]) ;
-    fprintf(fid,'%s,%s\n',["Venue",tr.info.name]) ;
-    fprintf(fid,'%s,%s\n',["Vehicle",veh.name]) ;
-    fprintf(fid,'%s,%s\n',["Driver",'OpenLap']) ;
-    fprintf(fid,'%s\n',"Device") ;
-    fprintf(fid,'%s\n',"Comment") ;
-    fprintf(fid,'%s,%s\n',["Date",datestr(now,'dd/mm/yyyy')]) ;
-    fprintf(fid,'%s,%s\n',["Time",datestr(now,'HH:MM:SS')]) ;
-    fprintf(fid,'%s,%s\n',["Frequency",num2str(freq,'%d')]) ;
-    fprintf(fid,'\n') ;
-    fprintf(fid,'\n') ;
-    fprintf(fid,'\n') ;
-    fprintf(fid,'\n') ;
-    fprintf(fid,'\n') ;
+    %fprintf(fid,'%s,%s\n',["Format","OpenLAP Export"]) ;
+    %fprintf(fid,'%s,%s\n',["Venue",tr.info.name]) ;
+    %fprintf(fid,'%s,%s\n',["Vehicle",veh.name]) ;
+    %fprintf(fid,'%s,%s\n',["Driver",'OpenLap']) ;
+    %fprintf(fid,'%s\n',"Device") ;
+    %fprintf(fid,'%s\n',"Comment") ;
+    %fprintf(fid,'%s,%s\n',["Date",datestr(now,'dd/mm/yyyy')]) ;
+    %fprintf(fid,'%s,%s\n',["Time",datestr(now,'HH:MM:SS')]) ;
+    %fprintf(fid,'%s,%s\n',["Frequency",num2str(freq,'%d')]) ;
+    %fprintf(fid,'\n') ;
+    %fprintf(fid,'\n') ;
+    %fprintf(fid,'\n') ;
+    %fprintf(fid,'\n') ;
+    %fprintf(fid,'\n') ;
     % writing channels
     form = [repmat('%s,',1,length(I)-1),'%s\n'] ;
-    fprintf(fid,form,channel_names{:}) ;
-    fprintf(fid,form,channel_names{:}) ;
-    fprintf(fid,form,channel_units{:}) ;
-    fprintf(fid,'\n') ;
-    fprintf(fid,'\n') ;
+    %fprintf(fid,form,channel_names{:}) ;
+    %fprintf(fid,form,channel_names{:}) ;
+    %fprintf(fid,form,channel_units{:}) ;
+    %fprintf(fid,'\n') ;
+    %fprintf(fid,'\n') ;
     form = [repmat('%f,',1,length(I)-1),'%f\n'] ;
     for i=1:length(t)
-        fprintf(fid,form,time_data(i,:)) ;
+        %fprintf(fid,form,time_data(i,:)) ;
     end
     % closing file
     fclose(fid) ;
     % HUD
-    disp('Exported .csv file successfully.')
-    fprintf(logid,'%s\n','Exported .csv file successfully.') ;
+    %disp('Exported .csv file successfully.')
+    %fprintf(logid,'%s\n','Exported .csv file successfully.') ;
 end

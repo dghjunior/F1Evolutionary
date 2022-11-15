@@ -1,0 +1,57 @@
+_______                    ____________________________________ __
+__  __ \______________________  __/__  __ \__    |_  ____/__  //_/
+_  / / /__  __ \  _ \_  __ \_  /  __  /_/ /_  /| |  /    __  ,<   
+/ /_/ /__  /_/ /  __/  / / /  /   _  _, _/_  ___ / /___  _  /| |  
+\____/ _  .___/\___//_/ /_//_/    /_/ |_| /_/  |_\____/  /_/ |_|  
+       /_/                                                        
+==================================================================
+Spa-Francorchamps.xlsx
+File read successfully
+==================================================================
+Name:          Spa-Francorchamps
+City:          Francorchamps
+Country:       Belgium
+Type:          Permanent
+Configuration: Closed
+Direction:     Forward
+Mirror:        Off
+Date:          15/11/2022
+Time:          15:59:26
+==================================================================
+Track generation started.
+Pre-processing completed.
+Fine meshing completed with mesh size: 1 [m]
+Apex calculation completed.
+Track rotated.
+Closing fine mesh map.
+Fine mesh map closed.
+Fine mesh map created.
+Plots created and saved.
+Track generated successfully.
+Map:
+                  ooooooooo                                        
+                 oo       oo                                       
+                 oo        o                                       
+                  oo       oo                                      
+                   oo       o                                      
+                    o       oo                                     
+                  ooo        o                                     
+                ooo          o                                     
+                oo          oo                                     
+                 oo         o                                      
+ooo               ooo       o                                      
+o oo                oo      oo                                     
+o  o                 oo      o                                     
+o  o                  oo     oo                                    
+o  ooooo               o      ooo                                  
+o      oooooo         oo        oo                                 
+o           oooooo  ooo          ooooooo                           
+ooooo            oooo                  oooooo                      
+    oo                                      oooo                   
+     ooo                                       oooo                
+       oooooo                                    oo                
+            ooooooo                              oooooooooooooooooo
+                  ooooooo                                     ooooo
+                        ooooooo                           ooooo    
+                              ooooooooooooo  oooooooooooooo        
+                                          oooo                     

@@ -7,72 +7,148 @@ from deap import base
 from deap import benchmarks
 from deap import creator
 from deap import tools
+import xlsxwriter
+import matlab.engine
 
-name = 'Formula 1 2022'
-type = 'Open Wheel'
-mass = 798 #kg
-#frontal_mass = [0.445, 0.540]
-#wheelbase = [3460mm, 3600mm]
-steering_ratio = 10
-#lift_coef = [-4.4, -2.8]
-#drag_coef = [-1.1, --0.7]
-cl_mult = 1
-cd_mult = 1
-#aero_dist = [0.5, 0.7]
-#frontal_area = [0.9m2, 1.4m2]
-air_density = 1.225 #kg/m3
-#disc_diameter = [325mm, 330mm]
-#pad_height = [52mm, 52.8mm]
-pad_friction = 0.45
-#caliper_num_pistons = [1, 6]
-caliper_piston_d = 52 #mm
-master_cyl_d = 32.5 #mm
-pedal_ratio = 4
-grip_factor = 1
-tire_radius = 457 #mm
-rolling_resistance = -0.001
-long_fric_coef = 2
-long_load_rating = 300 #kg
-long_fric_sens = 0.0001
-lat_fric_coef = 2
-lat_load_rating = 300 #kg
-lat_fric_sens = 0.0001
-#front_stiffness = [800, 1200]
-#rear_stiffness = [800, 1200]
-power_mult = 1
-thermal_eff = 0.35
-fuel_heating_value = 47200000 #J/kg
-drive_type = 'RWD'
-shift_time = 0.01 #sec
-primary_gear_eff = 1
-final_gear_eff = 0.92
-gearbox_eff = 0.98
-primary_gear_red = 1
-final_gear_red = 7
-#first_ratio = [2, 3]
-#second_ratio = [Prev*0.7, Prev*0.9]
-#third_ratio = [Prev*0.7, Prev*0.9]
-#fourth_ratio = [Prev*0.7, Prev*0.9]
-#fifth_fatio = [Prev*0.7, Prev*0.9]
-#sixth_ratio = [Prev*0.7, Prev*0.9]
-#seventh_ratio = [Prev*0.7, Prev*0.9]
-#eighth_ratio = [Prev*0.7, Prev*0.9]
+eng = matlab.engine.start_matlab()
+eng.cd(r'OpenLAP', nargout=0)
 
-#empty
-#ninth_ratio
-#tenth_ratio
+workbook = xlsxwriter.Workbook('F1Car.xlsx')
+worksheet = workbook.add_worksheet()
+worksheet.write('A1', 'Category')
+worksheet.write('B1', 'Description')
+worksheet.write('C1', 'Value')
+worksheet.write('D1', 'Unit')
+worksheet.write('E1', 'Comment')
+
+row = 2
+col = 3
+
+info = (
+    ['Name', 'Formula 1'],
+    ['Type', 'Open Wheel'],
+    ['Total Mass', 798],
+    ['Front Mass Distribution', 0],
+    ['Wheelbase', 0],
+    ['Steering Rack Ratio', 10],
+    ['Lift Coefficient CL',  0],
+    ['Drag Coefficient CD', 0],
+    ['CL Scale Multiplier', 1],
+    ['CD Scale Multiplier', 1],
+    ['Front Aero Distribution', 0],
+    ['Frontal Area', 0],
+    ['Air Density', 1.225],
+    ['Disc Outer Diameter', 0],
+    ['Pad Height', 0],
+    ['Pad Friction Coefficient', 0.45],
+    ['Caliper Number of Pistons', 0],
+    ['Caliper Piston Diameter', 52],
+    ['Master Cylinder Piston Diameter', 32.5],
+    ['Pedal Ratio', 4],
+    ['Grip Factor Multiplier', 1],
+    ['Tyre Radius', 457],
+    ['Rolling Resistance', -0.001],
+    ['Longitudinal Friction Coefficient', 2],
+    ['Longitudinal Friction Load Rating', 300],
+    ['Longitudinal Friction Sensitivity', 0.0001],
+    ['Lateral Friction Coefficient', 2],
+    ['Lateral Friction Load Rating', 300],
+    ['Lateral Friction Sensitivity', 0.0001],
+    ['Front Cornering Stiffness', 0],
+    ['Rear Cornering Stiffness', 0],
+    ['Power Factor Multiplier', 1], 
+    ['Thermal Efficiency', 0.35],
+    ['Fuel Lower Heating Value', 47200000],
+    ['Drive Type', 'RWD'],
+    ['Gear Shift Time', 0.01],
+    ['Primary Gear Efficiency', 1],
+    ['Final Gear Efficiency', 0.92],
+    ['Gearbox Efficiency', 0.98],
+    ['Primary Gear Reduction', 1],
+    ['Final Gear Reduction', 7],
+    ['1st Gear Ratio', 0],
+    ['2nd Gear Ratio', 0],
+    ['3rd Gear Ratio', 0],
+    ['4th Gear Ratio', 0],
+    ['5th Gear Ratio', 0],
+    ['6th Gear Ratio', 0],
+    ['7th Gear Ratio', 0],
+    ['8th Gear Ratio', 0],
+    ['9th Gear Ratio', 0],
+    ['10th Gear Ratio', 0],
+)
+
+evolving = (
+    ['Front Mass Distribution', 0],          #frontal_mass = [0.445, 0.540]
+    ['Wheelbase', 0],                       #wheelbase = [3460mm, 3600mm]
+    ['Lift Coefficient CL', 0],             #lift_coef = [-4.4, -2.8]
+    ['Drag Coefficient CD', 0],             #drag_coef = [-1.1, --0.7]
+    ['Front Aero Distribution', 0],         #aero_dist = [0.5, 0.7]
+    ['Frontal Area', 0],                    #frontal_area = [0.9m2, 1.4m2]
+    ['Disc Outer Diameter', 0],             #disc_diameter = [325mm, 330mm]
+    ['Pad Height', 0],                      #pad_height = [52mm, 52.8mm]
+    ['Caliper Number of Pistons', 0],       #caliper_num_pistons = [1, 6]
+    ['Front Cornering Stiffness', 0],       #front_stiffness = [800, 1200]
+    ['Rear Cornering Stiffness', 0],        #rear_stiffness = [800, 1200]
+    ['1st Gear Ratio', 0],                  #first_ratio = [2, 3]
+    ['2nd Gear Ratio', 0],                  #second_ratio = [Prev*0.7, Prev*0.9]
+    ['3rd Gear Ratio', 0],                  #third_ratio = [Prev*0.7, Prev*0.9]
+    ['4th Gear Ratio', 0],                  #fourth_ratio = [Prev*0.7, Prev*0.9]
+    ['5th Gear Ratio', 0],                  #fifth_fatio = [Prev*0.7, Prev*0.9]
+    ['6th Gear Ratio', 0],                  #sixth_ratio = [Prev*0.7, Prev*0.9]
+    ['7th Gear Ratio', 0],                  #seventh_ratio = [Prev*0.7, Prev*0.9]
+    ['8th Gear Ratio', 0],                  #eighth_ratio = [Prev*0.7, Prev*0.9]                   
+)
+
+Prev = 2
+
+bounds = (
+    [0.445,  0.540],
+    [3460, 3600],
+    [-4.4, -2.8],
+    [-1.1, -0.7],
+    [0.5, 0.7],
+    [0.9, 1.4],
+    [325, 330],
+    [52, 52.8],
+    [1, 6],
+    [800,1200],
+    [800,1200],
+    [2,3],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+    [Prev*0.7, Prev*0.9],
+)
+
+workbook.close()
 
 #TODO-DANIEL
-def evalLapTime():
-    return 0.0
+def evalLapTime(filename):
+    eng.OpenVEHICLEnew(nargout=0)
+    laptime = eng.OpenLAP(nargout=1)
+    print(laptime)
 
 #TODO-ANDY
 def cxIntermediate(ratio):
     return 0.0
 
-#TODO-DANIEL
+#TODO-DANIEL add loop for individual genes and bounds
 def mutationAdaptFeasible():
-    return 0.0
+    lb = 5
+    ub = 100
+    gene = 60
+    r = random.uniform(0, 1)
+    s = random.uniform(0,1)**0.35
+    t = (gene-lb)/(ub-lb)
+    if t < r:
+        gene = gene - s*(gene-lb)
+    else:
+        gene = gene + s*(ub-gene)        
+
 
 #TODO-DANIEL
 # Write island model stuff
@@ -97,8 +173,9 @@ toolbox.register("select", tools.selTournament, tournsize=2)
 
 def main():
     random.seed()
+    mutationAdaptFeasible()
 
-    pop = toolbox.population(n=50)
+    pop = toolbox.population(n=30)
     hof = tools.HallOfFame(3)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", numpy.mean)

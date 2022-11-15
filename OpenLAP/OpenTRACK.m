@@ -59,11 +59,11 @@ fclose('all') ;
 %% Track file selection
 
 % filename = 'Paul Ricard data.csv' ;
-% filename = 'Spa-Francorchamps.xlsx' ;
+filename = 'Spa-Francorchamps.xlsx' ;
 % filename = 'Monza Data.csv' ;
 % filename = 'OpenTRACK Laguna Seca Data.csv' ;
 % filename = 'OpenTRACK Paul Ricard Data.csv' ;
-filename = 'OpenTRACK_FSAE_UK_Endurance_2015.xlsx' ;
+% filename = 'OpenTRACK_FSAE_UK_Endurance_2015.xlsx' ;
 % filename = 'OpenTRACK KZ2 Kart Data - Rhodes.csv' ;
 % filename = 'OpenTRACK KZ2 Kart Data - Athens.csv' ;
 
@@ -244,11 +244,11 @@ disp('Track generation started.')
 if strcmp(mode,'logged data') % logged data
     % getting unique points
     [x,rows_to_keep,~] = unique(x) ;
-    v = smooth(v(rows_to_keep),round(freq*filter_dt)) ;
-    w = smooth(w(rows_to_keep),round(freq*filter_dt)) ;
-    ay = smooth(ay(rows_to_keep),round(freq*filter_dt)) ;
-    el = smooth(el(rows_to_keep),round(freq*filter_dt)) ;
-    bk = smooth(bk(rows_to_keep),round(freq*filter_dt)) ;
+    v = smoothdata(v(rows_to_keep),round(freq*filter_dt)) ;
+    w = smoothdata(w(rows_to_keep),round(freq*filter_dt)) ;
+    ay = smoothdata(ay(rows_to_keep),round(freq*filter_dt)) ;
+    el = smoothdata(el(rows_to_keep),round(freq*filter_dt)) ;
+    bk = smoothdata(bk(rows_to_keep),round(freq*filter_dt)) ;
     gf = gf(rows_to_keep) ;
     sc = sc(rows_to_keep) ;
     % shifting position vector for 0 value at start
@@ -260,7 +260,7 @@ if strcmp(mode,'logged data') % logged data
         case 'speed & latacc'
             r = lambda*ay./v.^2 ;
     end
-    r = smooth(r,round(freq*filter_dt)) ;
+    r = smoothdata(r,round(freq*filter_dt)) ;
     % mirroring if needed
     if strcmp(info.mirror,'On')
         r = -r ;
@@ -507,8 +507,8 @@ if strcmp(info.config,'Closed') % closed track
     % HUD
     disp('Fine mesh map closed.')
 end
-% smoothing track inclination
-incl = smooth(incl) ;
+% smoothdataing track inclination
+incl = smoothdata(incl) ;
 % HUD
 disp('Fine mesh map created.')
 
