@@ -17,7 +17,7 @@ car_num = 0
 
 def xlsxsetup():
     global car_num
-    filename = 'individual_' + str(car_num) + '.xlsx'
+    filename = 'Individuals/individual_' + str(car_num) + '.xlsx'
     car_num += 1
     workbook = xlsxwriter.Workbook(filename)
     worksheet = workbook.add_worksheet('Info')
