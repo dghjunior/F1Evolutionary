@@ -115,13 +115,13 @@ bounds = (
     [800,1200],
     [800,1200],
     [2,3],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
-    [Prev*0.7, Prev*0.9],
+    [1.75, 2.2],
+    [1.5, 1.9],
+    [1.2, 1.6],
+    [1.15, 1.4],
+    [1.05, 1.25],
+    [0.9, 1.15],
+    [0.75, 1],
 )
 
 workbook.close()
@@ -129,25 +129,25 @@ workbook.close()
 #TODO-DANIEL
 def evalLapTime(filename):
     eng.OpenVEHICLEnew(nargout=0)
-    laptime = eng.OpenLAP(nargout=1)
-    print(laptime)
+    return float(eng.OpenLAP(nargout=1)),
 
 #TODO-ANDY
 def cxIntermediate(ratio):
     return 0.0
 
 #TODO-DANIEL add loop for individual genes and bounds
-def mutationpower():
-    lb = 5
-    ub = 100
-    gene = 60
-    r = random.uniform(0, 1)
-    s = random.uniform(0,1)**0.35
-    t = (gene-lb)/(ub-lb)
-    if t < r:
-        gene = gene - s*(gene-lb)
-    else:
-        gene = gene + s*(ub-gene)        
+def mutationpower(individual):
+    for i in range(0,19):
+        lb = bounds[i][0]
+        ub = bounds[i][1]
+        gene = individual[i]
+        r = random.uniform(0, 1)
+        s = random.uniform(0,1)**0.35
+        t = (gene-lb)/(ub-lb)
+        if t < r:
+            gene = gene - s*(gene-lb)
+        else:
+            gene = gene + s*(ub-gene)        
 
 
 #TODO-DANIEL
@@ -204,7 +204,7 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.fro
 )
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
-toolbox.register("mate", cxIntermediate, ratio = 0.8)
+toolbox.register("mate", tools.cxUniform, indpb=0.8)
 toolbox.register("mutate", mutationpower)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
