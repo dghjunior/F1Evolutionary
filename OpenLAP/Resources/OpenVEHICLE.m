@@ -39,7 +39,7 @@ fclose('all') ;
 
 %% Vehicle file selection
 
-filename = 'Formula 1.xlsx' ;
+filename = 'C:\Users\dghju\Documents\GitHub\F1Evolutionary\Individuals/individual_0.xlsx' ;
 
 %% Reading vehicle file
 

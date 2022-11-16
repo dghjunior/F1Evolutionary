@@ -50,7 +50,7 @@ function laptime = OpenLAP()
     %% Filenames
 
     trackfile = 'OpenTRACK Tracks/OpenTRACK_Spa-Francorchamps_Closed_Forward.mat' ;
-    vehiclefile = 'OpenVEHICLE Vehicles/OpenVEHICLE_Formula 1_Open Wheel.mat' ;
+    vehiclefile = 'C:\Users\dghju\Documents\GitHub\F1Evolutionary\Individuals\individual_0.xlsx' ;
 
     %% Loading circuit
 

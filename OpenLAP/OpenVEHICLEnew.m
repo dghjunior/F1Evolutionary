@@ -29,10 +29,10 @@
 %
 % April 2020.
 
-function vehicle()
+function OpenVEHICLEnew(f)
     %% Clearing Memory
 
-    clear
+    clearvars -except f
     clc
     close all force
     diary('off')
@@ -40,7 +40,8 @@ function vehicle()
 
     %% Vehicle file selection
 
-    filename = 'Formula 1.xlsx' ;
+    %filename = 'Formula 1.xlsx' ;
+    filename = strcat('C:\Users\dghju\Documents\GitHub\F1Evolutionary\',f);
 
     %% Reading vehicle file
 
@@ -107,7 +108,8 @@ function vehicle()
     %% HUD
 
     [folder_status,folder_msg] = mkdir('OpenVEHICLE Vehicles') ;
-    vehname = "OpenVEHICLE Vehicles/OpenVEHICLE_"+name+"_"+type ;
+    [~,fname,~] = fileparts(f);
+    vehname = strcat("OpenVEHICLE Vehicles/OpenVEHICLE_",fname) ;
     delete(vehname+".log") ;
     diary(vehname+".log") ;
     %disp([...
@@ -216,6 +218,8 @@ function vehicle()
     % getting arrive points
     arrive_points = engine_speed_gear_change(2:2:length(engine_speed_gear_change)) ;
     % calculating revdrops
+    disp(shift_points)
+    disp(arrive_points)
     rev_drops = shift_points-arrive_points ;
     % creating shifting table
     rownames = cell(nog-1,1) ;
