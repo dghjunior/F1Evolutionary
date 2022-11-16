@@ -13,70 +13,83 @@ import matlab.engine
 eng = matlab.engine.start_matlab()
 eng.cd(r'OpenLAP', nargout=0)
 
-workbook = xlsxwriter.Workbook('F1Car.xlsx')
-worksheet = workbook.add_worksheet()
-worksheet.write('A1', 'Category')
-worksheet.write('B1', 'Description')
-worksheet.write('C1', 'Value')
-worksheet.write('D1', 'Unit')
-worksheet.write('E1', 'Comment')
+car_num = 0
 
-row = 2
-col = 3
+def xlsxsetup():
+    global car_num
+    filename = 'individual_' + str(car_num) + '.xlsx'
+    car_num += 1
+    workbook = xlsxwriter.Workbook(filename)
+    worksheet = workbook.add_worksheet('Info')
+    worksheet.write('A1', 'Category')
+    worksheet.write('B1', 'Description')
+    worksheet.write('C1', 'Value')
+    worksheet.write('D1', 'Unit')
+    worksheet.write('E1', 'Comment')
 
-info = (
-    ['Name', 'Formula 1'],
-    ['Type', 'Open Wheel'],
-    ['Total Mass', 798],
-    ['Front Mass Distribution', 0],
-    ['Wheelbase', 0],
-    ['Steering Rack Ratio', 10],
-    ['Lift Coefficient CL',  0],
-    ['Drag Coefficient CD', 0],
-    ['CL Scale Multiplier', 1],
-    ['CD Scale Multiplier', 1],
-    ['Front Aero Distribution', 0],
-    ['Frontal Area', 0],
-    ['Air Density', 1.225],
-    ['Disc Outer Diameter', 0],
-    ['Pad Height', 0],
-    ['Pad Friction Coefficient', 0.45],
-    ['Caliper Number of Pistons', 0],
-    ['Caliper Piston Diameter', 52],
-    ['Master Cylinder Piston Diameter', 32.5],
-    ['Pedal Ratio', 4],
-    ['Grip Factor Multiplier', 1],
-    ['Tyre Radius', 457],
-    ['Rolling Resistance', -0.001],
-    ['Longitudinal Friction Coefficient', 2],
-    ['Longitudinal Friction Load Rating', 300],
-    ['Longitudinal Friction Sensitivity', 0.0001],
-    ['Lateral Friction Coefficient', 2],
-    ['Lateral Friction Load Rating', 300],
-    ['Lateral Friction Sensitivity', 0.0001],
-    ['Front Cornering Stiffness', 0],
-    ['Rear Cornering Stiffness', 0],
-    ['Power Factor Multiplier', 1], 
-    ['Thermal Efficiency', 0.35],
-    ['Fuel Lower Heating Value', 47200000],
-    ['Drive Type', 'RWD'],
-    ['Gear Shift Time', 0.01],
-    ['Primary Gear Efficiency', 1],
-    ['Final Gear Efficiency', 0.92],
-    ['Gearbox Efficiency', 0.98],
-    ['Primary Gear Reduction', 1],
-    ['Final Gear Reduction', 7],
-    ['1st Gear Ratio', 0],
-    ['2nd Gear Ratio', 0],
-    ['3rd Gear Ratio', 0],
-    ['4th Gear Ratio', 0],
-    ['5th Gear Ratio', 0],
-    ['6th Gear Ratio', 0],
-    ['7th Gear Ratio', 0],
-    ['8th Gear Ratio', 0],
-    ['9th Gear Ratio', 0],
-    ['10th Gear Ratio', 0],
-)
+    row = 2
+    col = 2
+
+    info = (
+        ['Name', 'Formula 1'],
+        ['Type', 'Open Wheel'],
+        ['Total Mass', 798],
+        ['Front Mass Distribution', 0],
+        ['Wheelbase', 0],
+        ['Steering Rack Ratio', 10],
+        ['Lift Coefficient CL',  0],
+        ['Drag Coefficient CD', 0],
+        ['CL Scale Multiplier', 1],
+        ['CD Scale Multiplier', 1],
+        ['Front Aero Distribution', 0],
+        ['Frontal Area', 0],
+        ['Air Density', 1.225],
+        ['Disc Outer Diameter', 0],
+        ['Pad Height', 0],
+        ['Pad Friction Coefficient', 0.45],
+        ['Caliper Number of Pistons', 0],
+        ['Caliper Piston Diameter', 52],
+        ['Master Cylinder Piston Diameter', 32.5],
+        ['Pedal Ratio', 4],
+        ['Grip Factor Multiplier', 1],
+        ['Tyre Radius', 457],
+        ['Rolling Resistance', -0.001],
+        ['Longitudinal Friction Coefficient', 2],
+        ['Longitudinal Friction Load Rating', 300],
+        ['Longitudinal Friction Sensitivity', 0.0001],
+        ['Lateral Friction Coefficient', 2],
+        ['Lateral Friction Load Rating', 300],
+        ['Lateral Friction Sensitivity', 0.0001],
+        ['Front Cornering Stiffness', 0],
+        ['Rear Cornering Stiffness', 0],
+        ['Power Factor Multiplier', 1], 
+        ['Thermal Efficiency', 0.35],
+        ['Fuel Lower Heating Value', 47200000],
+        ['Drive Type', 'RWD'],
+        ['Gear Shift Time', 0.01],
+        ['Primary Gear Efficiency', 1],
+        ['Final Gear Efficiency', 0.92],
+        ['Gearbox Efficiency', 0.98],
+        ['Primary Gear Reduction', 1],
+        ['Final Gear Reduction', 7],
+        ['1st Gear Ratio', 0],
+        ['2nd Gear Ratio', 0],
+        ['3rd Gear Ratio', 0],
+        ['4th Gear Ratio', 0],
+        ['5th Gear Ratio', 0],
+        ['6th Gear Ratio', 0],
+        ['7th Gear Ratio', 0],
+        ['8th Gear Ratio', 0],
+        ['9th Gear Ratio', 0],
+        ['10th Gear Ratio', 0],
+    )
+
+    for Description, Value in (info):
+        worksheet.write(row, col, Description)
+        worksheet.write(row, col + 1, Value)
+        row += 1
+
+    workbook.close()
 
 evolving = (
     ['Front Mass Distribution', 0],          #frontal_mass = [0.445, 0.540]
@@ -100,8 +113,6 @@ evolving = (
     ['8th Gear Ratio', 0],                  #eighth_ratio = [Prev*0.7, Prev*0.9]                   
 )
 
-Prev = 2
-
 bounds = (
     [0.445,  0.540],
     [3460, 3600],
@@ -124,10 +135,9 @@ bounds = (
     [0.75, 1],
 )
 
-workbook.close()
-
 #TODO-DANIEL
-def evalLapTime(filename):
+def evalLapTime(x):
+    xlsxsetup()
     eng.OpenVEHICLEnew(nargout=0)
     return float(eng.OpenLAP(nargout=1)),
 
