@@ -41,7 +41,7 @@ function OpenVEHICLEnew(f)
     %% Vehicle file selection
 
     %filename = 'Formula 1.xlsx' ;
-    filename = strcat('C:\Users\dghju\Documents\GitHub\F1Evolutionary\',f);
+    filename = f;
 
     %% Reading vehicle file
 
