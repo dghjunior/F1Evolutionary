@@ -51,7 +51,7 @@ function laptime = OpenLAP(f)
 
     %% Filenames
 
-    trackfile = 'OpenTRACK Tracks/OpenTRACK_Spa-Francorchamps_Closed_Forward.mat' ;
+    trackfile = 'OpenTRACK Tracks/OpenTRACK_Autodromo Nazionale Monza_Closed_Forward.mat' ;
     %vehiclefile = 'OpenVEHICLE Vehicles/OpenVEHICLE_Formula 1.mat' ;
     [~,fname,~] = fileparts(f);
     vehiclefile = strcat('OpenVEHICLE Vehicles/OpenVEHICLE_', fname);

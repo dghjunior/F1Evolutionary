@@ -224,7 +224,6 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
-#TODO fix gene representation
 toolbox.register('frontal_mass', random.uniform, 44.5, 54.0)
 toolbox.register('wheelbase', random.randint, 3460, 3600)
 toolbox.register('lift_coef', random.uniform, -4.4, -2.8)
@@ -244,8 +243,6 @@ toolbox.register('fifth_ratio', random.uniform, 1.15, 1.4)
 toolbox.register('sixth_ratio', random.uniform, 1.05, 1.25)
 toolbox.register('seventh_ratio', random.uniform, 0.9, 1.15)
 toolbox.register('eight_ratio', random.uniform, 0.75, 1)
-
-#TODO add new genes for individual representation
 toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.frontal_mass,
     toolbox.wheelbase,
     toolbox.lift_coef,
