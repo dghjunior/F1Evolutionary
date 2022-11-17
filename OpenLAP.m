@@ -36,6 +36,8 @@
 
 function laptime = OpenLAP(f)
     %% Clearing memory
+    warning('off', 'all')
+
 
     clearvars -except f
     clc

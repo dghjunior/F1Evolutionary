@@ -31,6 +31,7 @@
 
 function OpenVEHICLEnew(f)
     %% Clearing Memory
+    warning('off', 'all')
 
     clearvars -except f
     clc

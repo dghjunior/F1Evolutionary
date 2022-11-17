@@ -36,6 +36,8 @@
 
 function laptime = OpenLAP(f)
     %% Clearing memory
+    warning('off', 'all')
+
 
     clearvars -except f
     clc
@@ -126,6 +128,7 @@ function laptime = OpenLAP(f)
     Xpos = floor((SS(3)-W)/2) ;
     Ypos = floor((SS(4)-H)/2) ;
     f = figure('Name','OpenLAP Simulation Results','Position',[Xpos,Ypos,W,H]) ;
+    f.Visible = false;
     figname = ["OpenLAP: "+char(veh.name)+" @ "+tr.info.name,"Date & Time: "+datestr(now,'yyyy/mm/dd')+" "+datestr(now,'HH:MM:SS')] ;
     sgtitle(figname)
 
