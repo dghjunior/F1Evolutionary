@@ -218,8 +218,6 @@ function OpenVEHICLEnew(f)
     % getting arrive points
     arrive_points = engine_speed_gear_change(2:2:length(engine_speed_gear_change)) ;
     % calculating revdrops
-    disp(shift_points)
-    disp(arrive_points)
     rev_drops = shift_points-arrive_points ;
     % creating shifting table
     rownames = cell(nog-1,1) ;
@@ -337,6 +335,7 @@ function OpenVEHICLEnew(f)
     Xpos = floor((SS(3)-W)/2) ;
     Ypos = floor((SS(4)-H)/2) ;
     f = figure('Name','Vehicle Model','Position',[Xpos,Ypos,W,H]) ;
+    f.Visible = false;
     sgtitle(name)
 
     % rows and columns

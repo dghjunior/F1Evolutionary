@@ -42,24 +42,22 @@ def xlsxsetup(arr):
     worksheet2.write('B1', 'Torque [Nm]')
 
     torque_curve = (
-        [1000, 125],
-        [2000, 125],
-        [3000, 125],
-        [4000, 125],
-        [5000, 125],
-        [6000, 125],
-        [7000, 150],
-        [8000, 200],
-        [9000, 240],
-        [10000, 270],
-        [11000, 300],
-        [12000, 340],
-        [13000, 350],
-        [14000, 340],
-        [15000, 330],
-        [16000, 325],
-        [17000, 312],
-        [18000, 296.75],
+        [1000, 460],
+        [2000, 470],
+        [3000, 490],
+        [4000, 520],
+        [5000, 600],
+        [6000, 610],
+        [7000, 680],
+        [8000, 710],
+        [9000, 675],
+        [10000, 640],
+        [11000, 595],
+        [12000, 460],
+        [13000, 400],
+        [14000, 350],
+        [15000, 300],
+        [16000, 250],
     )
 
     row = 1
@@ -97,11 +95,11 @@ evolving = (
 )
 
 bounds = (
-    [0.445,  0.540],
+    [44.5,  54],
     [3460, 3600],
     [-4.4, -2.8],
     [-1.1, -0.7],
-    [0.5, 0.7],
+    [50, 70],
     [0.9, 1.4],
     [325, 330],
     [52, 52.8],
@@ -124,20 +122,20 @@ def evalLapTime(ind):
         ['Name', 'Formula 1'],
         ['Type', 'Open Wheel'],
         ['Total Mass', 798],
-        ['Front Mass Distribution', 0],
-        ['Wheelbase', 0],
+        ['Front Mass Distribution', 45],
+        ['Wheelbase', 3500],
         ['Steering Rack Ratio', 10],
-        ['Lift Coefficient CL',  0],
-        ['Drag Coefficient CD', 0],
+        ['Lift Coefficient CL',  -4.8],
+        ['Drag Coefficient CD', -1.2],
         ['CL Scale Multiplier', 1],
         ['CD Scale Multiplier', 1],
-        ['Front Aero Distribution', 0],
-        ['Frontal Area', 0],
+        ['Front Aero Distribution', 50],
+        ['Frontal Area', 1],
         ['Air Density', 1.225],
-        ['Disc Outer Diameter', 0],
-        ['Pad Height', 0],
+        ['Disc Outer Diameter', 325],
+        ['Pad Height', 52],
         ['Pad Friction Coefficient', 0.45],
-        ['Caliper Number of Pistons', 0],
+        ['Caliper Number of Pistons', 6],
         ['Caliper Piston Diameter', 52],
         ['Master Cylinder Piston Diameter', 32.5],
         ['Pedal Ratio', 4],
@@ -150,8 +148,8 @@ def evalLapTime(ind):
         ['Lateral Friction Coefficient', 2],
         ['Lateral Friction Load Rating', 300],
         ['Lateral Friction Sensitivity', 0.0001],
-        ['Front Cornering Stiffness', 0],
-        ['Rear Cornering Stiffness', 0],
+        ['Front Cornering Stiffness', 900],
+        ['Rear Cornering Stiffness', 1100],
         ['Power Factor Multiplier', 1], 
         ['Thermal Efficiency', 0.35],
         ['Fuel Lower Heating Value', 47200000],
@@ -161,15 +159,15 @@ def evalLapTime(ind):
         ['Final Gear Efficiency', 0.92],
         ['Gearbox Efficiency', 0.98],
         ['Primary Gear Reduction', 1],
-        ['Final Gear Reduction', 7],
-        ['1st Gear Ratio', 0],
-        ['2nd Gear Ratio', 0],
-        ['3rd Gear Ratio', 0],
-        ['4th Gear Ratio', 0],
-        ['5th Gear Ratio', 0],
-        ['6th Gear Ratio', 0],
-        ['7th Gear Ratio', 0],
-        ['8th Gear Ratio', 0],
+        ['Final Gear Reduction', 8],
+        ['1st Gear Ratio', 2.57],
+        ['2nd Gear Ratio', 2.11],
+        ['3rd Gear Ratio', 1.75],
+        ['4th Gear Ratio', 1.46],
+        ['5th Gear Ratio', 1.29],
+        ['6th Gear Ratio', 1.13],
+        ['7th Gear Ratio', 1],
+        ['8th Gear Ratio', 0.9],
         ['9th Gear Ratio', ''],
         ['10th Gear Ratio', ''],
     )
@@ -194,25 +192,28 @@ def evalLapTime(ind):
     info[48][1] = ind[18]
     filename = xlsxsetup(info)
     eng.OpenVEHICLEnew(filename, nargout=0)
-    return float(eng.OpenLAP(nargout=1)),
+    return float(eng.OpenLAP(filename, nargout=1)),
 
 #TODO-ANDY
 def cxIntermediate(ratio):
     return 0.0
 
 #TODO-DANIEL add loop for individual genes and bounds
-def mutationpower(individual):
-    for i in range(0,19):
-        lb = bounds[i][0]
-        ub = bounds[i][1]
-        gene = individual[i]
-        r = random.uniform(0, 1)
-        s = random.uniform(0,1)**0.35
-        t = (gene-lb)/(ub-lb)
-        if t < r:
-            gene = gene - s*(gene-lb)
-        else:
-            gene = gene + s*(ub-gene)        
+def mutationpower(individual, indpb):
+    size = len(individual)
+    for i in range(size):
+        if random.random() < indpb:
+            lb = bounds[i][0]
+            ub = bounds[i][1]
+            gene = individual[i]
+            r = random.uniform(0, 1)
+            s = random.uniform(0,1)**0.35
+            t = (gene-lb)/(ub-lb)
+            if t < r:
+                individual[i] = gene - s*(gene-lb)
+            else:
+                individual[i] = gene + s*(ub-gene)
+    return individual,
 
 
 #TODO-DANIEL
@@ -225,11 +226,11 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 toolbox = base.Toolbox()
 
 #TODO fix gene representation
-toolbox.register('frontal_mass', random.uniform, 0.445, 0.540)
+toolbox.register('frontal_mass', random.uniform, 44.5, 54.0)
 toolbox.register('wheelbase', random.randint, 3460, 3600)
 toolbox.register('lift_coef', random.uniform, -4.4, -2.8)
 toolbox.register('drag_coef', random.uniform, -1.1, -0.7)
-toolbox.register('aero_dist', random.uniform, 0.5, 0.7)
+toolbox.register('aero_dist', random.uniform, 50, 70)
 toolbox.register('frontal_area', random.uniform, 0.9, 1.4)
 toolbox.register('disc_diameter', random.randint, 325, 330)
 toolbox.register('pad_height', random.uniform, 52, 52.8)
@@ -270,7 +271,7 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.fro
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 toolbox.register("mate", tools.cxUniform, indpb=0.8)
-toolbox.register("mutate", mutationpower)
+toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
 def main():
