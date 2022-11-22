@@ -1,5 +1,3 @@
-import array
-import logging
 import random
 import numpy
 from deap import algorithms
@@ -11,7 +9,6 @@ import xlsxwriter
 import matlab.engine
 
 eng = matlab.engine.start_matlab()
-#eng.cd(r'OpenLAP', nargout=0)
 
 car_num = 0
 
@@ -115,7 +112,6 @@ bounds = (
     [0.75, 1],
 )
 
-#TODO-DANIEL
 def evalLapTime(ind):
     info = (
         ['Name', 'Formula 1'],
@@ -197,7 +193,6 @@ def evalLapTime(ind):
 def cxIntermediate(ratio):
     return 0.0
 
-#TODO-DANIEL add loop for individual genes and bounds
 def mutationpower(individual, indpb):
     size = len(individual)
     for i in range(size):
@@ -281,7 +276,6 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    #TODO-DANIEL check mutation probability
     algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
 
     return pop, stats, hof
