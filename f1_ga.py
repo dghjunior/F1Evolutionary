@@ -190,8 +190,12 @@ def evalLapTime(ind):
     return float(eng.OpenLAP(filename, nargout=1)),
 
 #TODO-ANDY
-def cxIntermediate(ratio):
-    return 0.0
+def cxIntermediate(ind1, ind2, ratio):
+    size = len(ind1)
+    ind3 = list(range(size))
+    for i in range(size):
+        ind3[i] = ind1[i] + ratio * abs(ind2[i] - ind1[i])
+    return ind3
 
 def mutationpower(individual, indpb):
     size = len(individual)
