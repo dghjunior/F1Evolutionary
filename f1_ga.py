@@ -265,7 +265,7 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.fro
 )
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
-toolbox.register("mate", tools.cxUniform, indpb=0.8)
+toolbox.register("mate", cxIntermediate, indpb=0.8)
 toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
