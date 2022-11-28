@@ -281,7 +281,7 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.8, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.8, mutpb=0.5, ngen=50, stats=stats, halloffame=hof, verbose=True)
     #algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
 
 
