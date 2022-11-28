@@ -7,6 +7,8 @@ from deap import creator
 from deap import tools
 import xlsxwriter
 import matlab.engine
+import shutil
+import os
 
 eng = matlab.engine.start_matlab()
 
@@ -162,7 +164,7 @@ def evalLapTime(ind):
         ['5th Gear Ratio', 1.29],
         ['6th Gear Ratio', 1.13],
         ['7th Gear Ratio', 1],
-        ['8th Gear Ratio', 0.9],
+        ['8th Gear Ratio', 0.8],
         ['9th Gear Ratio', ''],
         ['10th Gear Ratio', ''],
     )
@@ -177,7 +179,7 @@ def evalLapTime(ind):
     info[16][1] = ind[8]
     info[29][1] = ind[9]
     info[30][1] = ind[10]
-    info[41][1] = ind[11]
+    #info[41][1] = ind[11]
     #info[42][1] = ind[12]
     #info[43][1] = ind[13]
     #info[44][1] = ind[14]
@@ -193,8 +195,8 @@ def evalLapTime(ind):
 def cxIntermediate(ind1, ind2, ratio):
     size = len(ind1)
     for i in range(size):
-        ind1[i] = ind2[i] + ratio * abs(ind2[i] - ind1[i])
-        ind2[i] = ind1[i] + ratio * abs(ind2[i] - ind1[i])
+        ind1[i] = ind2[i] + ratio * (ind2[i] - ind1[i])
+        ind2[i] = ind1[i] + ratio * (ind2[i] - ind1[i])
 
     return ind1, ind2
 
@@ -272,6 +274,9 @@ toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
 def main():
+    shutil.rmtree('Individuals')
+    shutil.rmtree('OpenVEHICLE Vehicles')
+    os.makedirs('Individuals')
     random.seed()
 
     pop = toolbox.population(n=30)
