@@ -265,7 +265,7 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.fro
 )
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
-toolbox.register("mate", cxIntermediate, indpb=0.8)
+toolbox.register("mate", cxIntermediate, ratio=0.8)
 toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=2)
 
@@ -280,7 +280,9 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.8, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
+    #algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.5, ngen=500, stats=stats, halloffame=hof, verbose=True)
+
 
     return pop, stats, hof
 
