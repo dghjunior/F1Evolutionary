@@ -192,10 +192,11 @@ def evalLapTime(ind):
 #TODO-ANDY
 def cxIntermediate(ind1, ind2, ratio):
     size = len(ind1)
-    ind3 = list(range(size))
     for i in range(size):
-        ind3[i] = ind1[i] + ratio * abs(ind2[i] - ind1[i])
-    return ind3
+        ind1[i] = ind2[i] + ratio * abs(ind2[i] - ind1[i])
+        ind2[i] = ind1[i] + ratio * abs(ind2[i] - ind1[i])
+
+    return ind1, ind2
 
 def mutationpower(individual, indpb):
     size = len(individual)
