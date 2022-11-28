@@ -179,14 +179,14 @@ def evalLapTime(ind):
     info[16][1] = ind[8]
     info[29][1] = ind[9]
     info[30][1] = ind[10]
-    #info[41][1] = ind[11]
-    #info[42][1] = ind[12]
-    #info[43][1] = ind[13]
-    #info[44][1] = ind[14]
-    #info[45][1] = ind[15]
-    #info[46][1] = ind[16]
-    #info[47][1] = ind[17]
-    #info[48][1] = ind[18]
+    info[41][1] = ind[11]
+    info[42][1] = ind[12]
+    info[43][1] = ind[13]
+    info[44][1] = ind[14]
+    info[45][1] = ind[15]
+    info[46][1] = ind[16]
+    info[47][1] = ind[17]
+    info[48][1] = ind[18]
     filename = xlsxsetup(info)
     eng.OpenVEHICLEnew(filename, nargout=0)
     return float(eng.OpenLAP(filename, nargout=1)),
@@ -237,14 +237,14 @@ toolbox.register('pad_height', random.uniform, 52, 52.8)
 toolbox.register('caliper_num_pistons', random.randint, 1, 6)
 toolbox.register('front_stiffness', random.randint, 800, 1200)
 toolbox.register('rear_stiffness', random.randint, 800, 1200)
-toolbox.register('first_ratio', random.uniform, 2, 3)
-toolbox.register('second_ratio', random.uniform, 1.75, 2.2)
-toolbox.register('third_ratio', random.uniform, 1.5, 1.9)
-toolbox.register('fourth_ratio', random.uniform, 1.2, 1.6)
-toolbox.register('fifth_ratio', random.uniform, 1.15, 1.4)
-toolbox.register('sixth_ratio', random.uniform, 1.05, 1.25)
-toolbox.register('seventh_ratio', random.uniform, 0.9, 1.15)
-toolbox.register('eight_ratio', random.uniform, 0.75, 1)
+toolbox.register('first_ratio', random.uniform, 2.2, 3)
+toolbox.register('second_ratio', random.uniform, 1.79, 2.2)
+toolbox.register('third_ratio', random.uniform, 1.51, 1.75)
+toolbox.register('fourth_ratio', random.uniform, 1.35, 1.5)
+toolbox.register('fifth_ratio', random.uniform, 1.15, 1.3)
+toolbox.register('sixth_ratio', random.uniform, 1.05, 1.15)
+toolbox.register('seventh_ratio', random.uniform, 0.9, 1.05)
+toolbox.register('eight_ratio', random.uniform, 0.75, 0.9)
 toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.frontal_mass,
     toolbox.wheelbase,
     toolbox.lift_coef,
