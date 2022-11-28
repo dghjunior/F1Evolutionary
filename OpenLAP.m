@@ -240,7 +240,7 @@ function laptime = OpenLAP(f)
     % saving .mat file
     save(simname+".mat",'veh','tr','sim')
     % HUD
-    toc
+    %toc
     %fprintf(logid,'%s','Elapsed time is: ') ;
     %fprintf(logid,'%f',toc) ;
     %fprintf(logid,'%s\n',' [s]') ;
