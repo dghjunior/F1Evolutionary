@@ -195,8 +195,8 @@ def evalLapTime(ind):
 def cxIntermediate(ind1, ind2, ratio):
     size = len(ind1)
     for i in range(size):
-        ind1[i] = ind2[i] + ratio * (ind2[i] - ind1[i])
-        ind2[i] = ind1[i] + ratio * (ind2[i] - ind1[i])
+        ind1[i] = ind2[i] + ratio * abs(ind2[i] - ind1[i])
+        ind2[i] = ind1[i] + ratio * abs(ind2[i] - ind1[i])
 
     return ind1, ind2
 
