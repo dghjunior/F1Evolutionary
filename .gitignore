@@ -2,3 +2,5 @@
 Individuals/
 OpenLap Sims/
 OpenVEHICLE Vehicles/
+*.fig
+*.mat
