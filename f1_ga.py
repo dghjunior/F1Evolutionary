@@ -93,6 +93,7 @@ evolving = (
 )
 
 bounds = (
+    [825, 905],
     [44.5,  54],
     [3460, 3600],
     [-4.4, -2.8],
@@ -118,7 +119,7 @@ def evalLapTime(ind):
     info = (
         ['Name', 'Formula 1'],
         ['Type', 'Open Wheel'],
-        ['Total Mass', 798],
+        ['Total Mass', 850],
         ['Front Mass Distribution', 45],
         ['Wheelbase', 3500],
         ['Steering Rack Ratio', 10],
@@ -168,25 +169,26 @@ def evalLapTime(ind):
         ['9th Gear Ratio', ''],
         ['10th Gear Ratio', ''],
     )
-    info[3][1] = ind[0]
-    info[4][1] = ind[1]
-    info[6][1] = ind[2]
-    info[7][1] = ind[3]
-    info[10][1] = ind[4]
-    info[11][1] = ind[5]
-    info[13][1] = ind[6]
-    info[14][1] = ind[7]
-    info[16][1] = ind[8]
-    info[29][1] = ind[9]
-    info[30][1] = ind[10]
-    info[41][1] = ind[11]
-    info[42][1] = ind[12]
-    info[43][1] = ind[13]
-    info[44][1] = ind[14]
-    info[45][1] = ind[15]
-    info[46][1] = ind[16]
-    info[47][1] = ind[17]
-    info[48][1] = ind[18]
+    info[2][1] = ind[0]
+    info[3][1] = ind[1]
+    info[4][1] = ind[2]
+    info[6][1] = ind[3]
+    info[7][1] = ind[4]
+    info[10][1] = ind[5]
+    info[11][1] = ind[6]
+    info[13][1] = ind[7]
+    info[14][1] = ind[8]
+    info[16][1] = ind[9]
+    info[29][1] = ind[10]
+    info[30][1] = ind[11]
+    info[41][1] = ind[12]
+    info[42][1] = ind[13]
+    info[43][1] = ind[14]
+    info[44][1] = ind[15]
+    info[45][1] = ind[16]
+    info[46][1] = ind[17]
+    info[47][1] = ind[18]
+    info[48][1] = ind[19]
     filename = xlsxsetup(info)
     eng.OpenVEHICLEnew(filename, nargout=0)
     return float(eng.OpenLAP(filename, nargout=1)),
@@ -228,6 +230,7 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
+toolbox.register('vehicle_mass', random.uniform, 825, 905)
 toolbox.register('frontal_mass', random.uniform, 44.5, 54.0)
 toolbox.register('wheelbase', random.randint, 3460, 3600)
 toolbox.register('lift_coef', random.uniform, -4.4, -2.8)
@@ -247,7 +250,8 @@ toolbox.register('fifth_ratio', random.uniform, 1.15, 1.3)
 toolbox.register('sixth_ratio', random.uniform, 1.05, 1.15)
 toolbox.register('seventh_ratio', random.uniform, 0.9, 1.05)
 toolbox.register('eight_ratio', random.uniform, 0.75, 0.9)
-toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.frontal_mass,
+toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.vehicle_mass,
+    toolbox.frontal_mass,
     toolbox.wheelbase,
     toolbox.lift_coef,
     toolbox.drag_coef,
@@ -281,7 +285,7 @@ def main():
     os.makedirs('Individuals')
     random.seed()
 
-    pop = toolbox.population(n=50)
+    pop = toolbox.population(n=30)
     hof = tools.HallOfFame(3)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", numpy.mean)
@@ -289,7 +293,9 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.3, ngen=100, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.9, mutpb=0.4, ngen=2, stats=stats, halloffame=hof, verbose=True)
+
+    print(hof[0])
 
     return pop, stats, hof
 
