@@ -108,7 +108,7 @@ bounds = (
     [2,3],
     [1.75, 2.2],
     [1.5, 1.9],
-    [1.2, 1.6],
+    [1.4, 1.6],
     [1.15, 1.4],
     [1.05, 1.25],
     [0.9, 1.15],
@@ -286,14 +286,14 @@ def main():
     random.seed()
 
     pop = toolbox.population(n=30)
-    hof = tools.HallOfFame(3)
+    hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", numpy.mean)
     stats.register("Std", numpy.std)
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.9, mutpb=0.4, ngen=2, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.9, mutpb=0.4, ngen=100, stats=stats, halloffame=hof, verbose=True)
 
     print(hof[0])
 
