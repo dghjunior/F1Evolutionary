@@ -276,7 +276,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
 #toolbox.register("mate", tools.cxUniform, indpb=0.8)
-toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=map(lambda x: x[0], bounds), up=map(lambda x: x[1], bounds))
+toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
 toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
