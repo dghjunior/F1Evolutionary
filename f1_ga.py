@@ -278,7 +278,7 @@ toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", tools.cxUniform, indpb=0.8)
 toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=map(lambda x: x[0], bounds), up=map(lambda x: x[1], bounds))
 toolbox.register("mutate", mutationpower, indpb=0.3)
-toolbox.register("select", tools.selTournament, tournsize=2)
+toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     shutil.rmtree('Individuals')
@@ -294,7 +294,7 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.8, mutpb=0.5, ngen=100, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=0.9, mutpb=0.4, ngen=100, stats=stats, halloffame=hof, verbose=True)
 
     print(hof[0])
 
