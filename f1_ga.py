@@ -220,6 +220,24 @@ def mutationpower(individual, indpb):
                 individual[i] = gene + s*(ub-gene)
     return individual,
 
+nonUniformProb = [.15, .15, .075, .15, .15, .15, .15, .05, .05, .05, .075, .075, .15, .15, .15, .15, .15, .15, .15, .15]
+
+def nonUniformMutation(individual, indpb):
+    size = len(individual)
+    for i in range(size):
+        if random.random() < indpb:
+            if random.random() < nonUniformProb[i]:
+                lb = bounds[i][0]
+                ub = bounds[i][1]  
+                if random.random() >= .5:
+                    individual[i] = individual[i] * (1 + nonUniformProb[i])
+                    if individual[i] > ub:
+                        individual[i] = ub
+                else:
+                    individual[i] = individual[i] * (1 - nonUniformProb[i])
+                    if individual[i] < lb:
+                        individual[i] = lb
+    return individual,
 
 #TODO-DANIEL
 # Write island model stuff
@@ -275,9 +293,10 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.veh
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
-#toolbox.register("mate", tools.cxUniform, indpb=0.8)
-toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
-toolbox.register("mutate", mutationpower, indpb=0.3)
+toolbox.register("mate", tools.cxUniform, indpb=0.8)
+#toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
+#toolbox.register("mutate", mutationpower, indpb=0.3)
+toolbox.register("mutate", nonUniformMutation, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
