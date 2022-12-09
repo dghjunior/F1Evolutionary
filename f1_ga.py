@@ -9,6 +9,12 @@ import xlsxwriter
 import matlab.engine
 import shutil
 import os
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
+from itertools import repeat
 
 eng = matlab.engine.start_matlab()
 
@@ -71,7 +77,8 @@ def xlsxsetup(arr):
     return filename
 
 evolving = (
-    ['Front Mass Distribution', 0],          #frontal_mass = [0.445, 0.540]
+    ['Mass', 0],                             #mass = [825, 905]
+    ['Front Mass Distribution', 0],         #frontal_mass = [0.445, 0.540]
     ['Wheelbase', 0],                       #wheelbase = [3460mm, 3600mm]
     ['Lift Coefficient CL', 0],             #lift_coef = [-4.4, -2.8]
     ['Drag Coefficient CD', 0],             #drag_coef = [-1.1, --0.7]
@@ -94,7 +101,7 @@ evolving = (
 
 bounds = (
     [825, 905],
-    [44.5,  54],
+    [44.5,  54.0],
     [3460, 3600],
     [-4.4, -2.8],
     [-1.1, -0.7],
@@ -105,14 +112,14 @@ bounds = (
     [1, 6],
     [800,1200],
     [800,1200],
-    [2,3],
-    [1.75, 2.2],
-    [1.5, 1.9],
-    [1.4, 1.6],
-    [1.15, 1.4],
-    [1.05, 1.25],
-    [0.9, 1.15],
-    [0.75, 1],
+    [2.2,3],
+    [1.79, 2.2],
+    [1.51, 1.75],
+    [1.35, 1.5],
+    [1.15, 1.3],
+    [1.05, 1.15],
+    [0.9, 1.05],
+    [0.75, 0.9],
 )
 
 def evalLapTime(ind):
@@ -204,6 +211,55 @@ def cxIntermediate(ind1, ind2, ratio):
         
     return ind1, ind2
 
+def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
+    size = min(len(ind1), len(ind2))
+    if not isinstance(low, Sequence):
+        low = repeat(low, size)
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of the shorter individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
+        up = repeat(up, size)
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
+
+    for i, xl, xu in zip(range(size), low, up):
+        if random.random() <= 0.5:
+            # This epsilon should probably be changed for 0 since
+            # floating point arithmetic in Python is safer
+            if abs(ind1[i] - ind2[i]) > 1e-14:
+                x1 = min(ind1[i], ind2[i])
+                x2 = max(ind1[i], ind2[i])
+                rand = random.random()
+
+                beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
+                alpha = 2.0 - beta ** -(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
+
+                c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
+
+                beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
+                alpha = 2.0 - beta ** -(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
+                c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
+
+                c1 = min(max(c1, xl), xu)
+                c2 = min(max(c2, xl), xu)
+
+                if random.random() <= 0.5:
+                    ind1[i] = c2
+                    ind2[i] = c1
+                else:
+                    ind1[i] = c1
+                    ind2[i] = c2
+
+    return ind1, ind2
+
 def mutationpower(individual, indpb):
     size = len(individual)
     for i in range(size):
@@ -293,9 +349,9 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.veh
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
-toolbox.register("mate", tools.cxUniform, indpb=0.8)
-#toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
-#toolbox.register("mutate", mutationpower, indpb=0.3)
+#toolbox.register("mate", tools.cxUniform, indpb=0.8)
+toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
+toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("mutate", nonUniformMutation, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
