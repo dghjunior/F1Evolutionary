@@ -22,7 +22,7 @@ car_num = 0
 
 def xlsxsetup(arr):
     global car_num
-    filename = 'Individuals\individual_' + str(car_num) + '.xlsx'
+    filename = 'Individuals/individual_' + str(car_num) + '.xlsx'
     car_num += 1
     workbook = xlsxwriter.Workbook(filename)
     worksheet = workbook.add_worksheet('Info')
@@ -289,10 +289,14 @@ def nonUniformMutation(individual, indpb):
                     individual[i] = individual[i] * (1 + nonUniformProb[i])
                     if individual[i] > ub:
                         individual[i] = ub
+                    elif individual[i] < lb:
+                        individual[i] = lb
                 else:
                     individual[i] = individual[i] * (1 - nonUniformProb[i])
                     if individual[i] < lb:
                         individual[i] = lb
+                    elif individual[i] > ub:
+                        individual[i] = ub
     return individual,
 
 #TODO-DANIEL
@@ -349,9 +353,9 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.veh
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
-#toolbox.register("mate", tools.cxUniform, indpb=0.8)
-toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
-toolbox.register("mutate", mutationpower, indpb=0.3)
+toolbox.register("mate", tools.cxUniform, indpb=0.8)
+#toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
+#toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("mutate", nonUniformMutation, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
