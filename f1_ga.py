@@ -112,14 +112,14 @@ bounds = (
     [1, 6],
     [800,1200],
     [800,1200],
-    [2.2,3],
+    [2.21,3],
     [1.79, 2.2],
-    [1.51, 1.75],
-    [1.35, 1.5],
+    [1.51, 1.78],
+    [1.31, 1.5],
     [1.15, 1.3],
-    [1.05, 1.15],
-    [0.9, 1.05],
-    [0.75, 0.9],
+    [1.05, 1.14],
+    [0.9, 1.04],
+    [0.7, 0.89],
 )
 
 def evalLapTime(ind):
@@ -349,9 +349,9 @@ toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.veh
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
-#toolbox.register("mate", tools.cxUniform, indpb=0.8)
-toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
-toolbox.register("mutate", mutationpower, indpb=0.3)
+toolbox.register("mate", tools.cxUniform, indpb=0.8)
+#toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
+#toolbox.register("mutate", mutationpower, indpb=0.3)
 toolbox.register("mutate", nonUniformMutation, indpb=0.3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
