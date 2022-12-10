@@ -22,7 +22,7 @@ car_num = 0
 
 def xlsxsetup(arr):
     global car_num
-    filename = 'Individuals\individual_' + str(car_num) + '.xlsx'
+    filename = 'Individuals/individual_' + str(car_num) + '.xlsx'
     car_num += 1
     workbook = xlsxwriter.Workbook(filename)
     worksheet = workbook.add_worksheet('Info')
@@ -289,10 +289,14 @@ def nonUniformMutation(individual, indpb):
                     individual[i] = individual[i] * (1 + nonUniformProb[i])
                     if individual[i] > ub:
                         individual[i] = ub
+                    elif individual[i] < lb:
+                        individual[i] = lb
                 else:
                     individual[i] = individual[i] * (1 - nonUniformProb[i])
                     if individual[i] < lb:
                         individual[i] = lb
+                    elif individual[i] > ub:
+                        individual[i] = ub
     return individual,
 
 #TODO-DANIEL
