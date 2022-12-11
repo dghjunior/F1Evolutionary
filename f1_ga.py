@@ -9,12 +9,6 @@ import xlsxwriter
 import matlab.engine
 import shutil
 import os
-try:
-    from collections.abc import Sequence
-except ImportError:
-    from collections import Sequence
-
-from itertools import repeat
 
 eng = matlab.engine.start_matlab()
 
@@ -46,23 +40,7 @@ def xlsxsetup(arr):
     worksheet2.write('A1', 'Engine Speed [rpm]')
     worksheet2.write('B1', 'Torque [Nm]')
 
-    torque_curve = (
-        [1000, 529],
-        [2000, 540],
-        [3000, 564],
-        [4000, 598],
-        [5000, 690],
-        [6000, 702],
-        [7000, 782],
-        [8000, 817],
-        [9000, 776],
-        [10000, 776],
-        [11000, 750],
-        [12000, 736],
-        [13000, 684],
-        [14000, 529],
-        [15000, 460],
-    )
+    torque_curve = ([1000, 529], [2000, 540], [3000, 564], [4000, 598], [5000, 690], [6000, 702], [7000, 782], [8000, 817], [9000, 776], [10000, 776], [11000, 750], [12000, 736], [13000, 684], [14000, 529], [15000, 460],)
 
     row = 1
     col = 0
@@ -76,51 +54,9 @@ def xlsxsetup(arr):
 
     return filename
 
-evolving = (
-    ['Mass', 0],                             #mass = [825, 905]
-    ['Front Mass Distribution', 0],         #frontal_mass = [0.445, 0.540]
-    ['Wheelbase', 0],                       #wheelbase = [3460mm, 3600mm]
-    ['Lift Coefficient CL', 0],             #lift_coef = [-4.4, -2.8]
-    ['Drag Coefficient CD', 0],             #drag_coef = [-1.1, --0.7]
-    ['Front Aero Distribution', 0],         #aero_dist = [0.5, 0.7]
-    ['Frontal Area', 0],                    #frontal_area = [0.9m2, 1.4m2]
-    ['Disc Outer Diameter', 0],             #disc_diameter = [325mm, 330mm]
-    ['Pad Height', 0],                      #pad_height = [52mm, 52.8mm]
-    ['Caliper Number of Pistons', 0],       #caliper_num_pistons = [1, 6]
-    ['Front Cornering Stiffness', 0],       #front_stiffness = [800, 1200]
-    ['Rear Cornering Stiffness', 0],        #rear_stiffness = [800, 1200]
-    ['1st Gear Ratio', 0],                  #first_ratio = [2, 3]
-    ['2nd Gear Ratio', 0],                  #second_ratio = [Prev*0.7, Prev*0.9]
-    ['3rd Gear Ratio', 0],                  #third_ratio = [Prev*0.7, Prev*0.9]
-    ['4th Gear Ratio', 0],                  #fourth_ratio = [Prev*0.7, Prev*0.9]
-    ['5th Gear Ratio', 0],                  #fifth_fatio = [Prev*0.7, Prev*0.9]
-    ['6th Gear Ratio', 0],                  #sixth_ratio = [Prev*0.7, Prev*0.9]
-    ['7th Gear Ratio', 0],                  #seventh_ratio = [Prev*0.7, Prev*0.9]
-    ['8th Gear Ratio', 0],                  #eighth_ratio = [Prev*0.7, Prev*0.9]                   
-)
+evolving = (['Mass', 0], ['Front Mass Distribution', 0], ['Wheelbase', 0], ['Lift Coefficient CL', 0], ['Drag Coefficient CD', 0], ['Front Aero Distribution'], ['Frontal Area', 0], ['Disc Outer Diameter', 0], ['Pad Height', 0], ['Caliper Number of Pistons', 0], ['Front Cornering Stiffness', 0], ['Rear Cornering Stiffness', 0], ['1st Gear Ratio', 0], ['2nd Gear Ratio', 0], ['3rd Gear Ratio', 0], ['4th Gear Ratio', 0], ['5th Gear Ratio', 0], ['6th Gear Ratio', 0], ['7th Gear Ratio', 0], ['8th Gear Ratio', 0],)
 
-bounds = (
-    [825, 905],
-    [44.5,  54.0],
-    [3460, 3600],
-    [-4.4, -2.8],
-    [-1.1, -0.7],
-    [50, 70],
-    [0.9, 1.4],
-    [325, 330],
-    [52, 52.8],
-    [1, 6],
-    [800,1200],
-    [800,1200],
-    [2.21,3],
-    [1.79, 2.2],
-    [1.51, 1.78],
-    [1.31, 1.5],
-    [1.15, 1.3],
-    [1.05, 1.14],
-    [0.9, 1.04],
-    [0.7, 0.89],
-)
+bounds = ([825, 905], [44.5,  54.0], [3460, 3600], [-4.4, -2.8], [-1.1, -0.7], [50, 70], [0.9, 1.4], [325, 330], [52, 52.8], [1, 6], [800,1200], [800,1200], [2.21,3], [1.79, 2.2], [1.51, 1.78], [1.31, 1.5], [1.15, 1.3], [1.05, 1.14], [0.9, 1.04], [0.7, 0.89],)
 
 def evalLapTime(ind):
     info = (
@@ -211,55 +147,6 @@ def cxIntermediate(ind1, ind2, ratio):
         
     return ind1, ind2
 
-def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
-    size = min(len(ind1), len(ind2))
-    if not isinstance(low, Sequence):
-        low = repeat(low, size)
-    elif len(low) < size:
-        raise IndexError("low must be at least the size of the shorter individual: %d < %d" % (len(low), size))
-    if not isinstance(up, Sequence):
-        up = repeat(up, size)
-    elif len(up) < size:
-        raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
-
-    for i, xl, xu in zip(range(size), low, up):
-        if random.random() <= 0.5:
-            # This epsilon should probably be changed for 0 since
-            # floating point arithmetic in Python is safer
-            if abs(ind1[i] - ind2[i]) > 1e-14:
-                x1 = min(ind1[i], ind2[i])
-                x2 = max(ind1[i], ind2[i])
-                rand = random.random()
-
-                beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
-                alpha = 2.0 - beta ** -(eta + 1)
-                if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
-                else:
-                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
-
-                c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
-
-                beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
-                alpha = 2.0 - beta ** -(eta + 1)
-                if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
-                else:
-                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
-                c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
-
-                c1 = min(max(c1, xl), xu)
-                c2 = min(max(c2, xl), xu)
-
-                if random.random() <= 0.5:
-                    ind1[i] = c2
-                    ind2[i] = c1
-                else:
-                    ind1[i] = c1
-                    ind2[i] = c2
-
-    return ind1, ind2
-
 def mutationpower(individual, indpb):
     size = len(individual)
     for i in range(size):
@@ -299,10 +186,6 @@ def nonUniformMutation(individual, indpb):
                         individual[i] = ub
     return individual,
 
-#TODO-DANIEL
-# Write island model stuff
-
-
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -328,35 +211,17 @@ toolbox.register('fifth_ratio', random.uniform, 1.15, 1.3)
 toolbox.register('sixth_ratio', random.uniform, 1.05, 1.14)
 toolbox.register('seventh_ratio', random.uniform, 0.9, 1.04)
 toolbox.register('eight_ratio', random.uniform, 0.7, 0.89)
-toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.vehicle_mass,
-    toolbox.frontal_mass,
-    toolbox.wheelbase,
-    toolbox.lift_coef,
-    toolbox.drag_coef,
-    toolbox.aero_dist,
-    toolbox.frontal_area,
-    toolbox.disc_diameter,
-    toolbox.pad_height,
-    toolbox.caliper_num_pistons,
-    toolbox.front_stiffness,
-    toolbox.rear_stiffness,
-    toolbox.first_ratio,
-    toolbox.second_ratio,
-    toolbox.third_ratio,
-    toolbox.fourth_ratio,
-    toolbox.fifth_ratio,
-    toolbox.sixth_ratio,
-    toolbox.seventh_ratio,
-    toolbox.eight_ratio),
-    n=1
-)
+toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.vehicle_mass, toolbox.frontal_mass, toolbox.wheelbase, toolbox.lift_coef, toolbox.drag_coef, toolbox.aero_dist, toolbox.frontal_area, toolbox.disc_diameter, toolbox.pad_height, toolbox.caliper_num_pistons, toolbox.front_stiffness, toolbox.rear_stiffness, toolbox.first_ratio, toolbox.second_ratio, toolbox.third_ratio, toolbox.fourth_ratio, toolbox.fifth_ratio, toolbox.sixth_ratio, toolbox.seventh_ratio, toolbox.eight_ratio), n=1)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evalLapTime)
+
 #toolbox.register("mate", cxIntermediate, ratio=0.8)
-toolbox.register("mate", tools.cxUniform, indpb=0.8)
-#toolbox.register("mate", cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
-#toolbox.register("mutate", mutationpower, indpb=0.3)
-toolbox.register("mutate", nonUniformMutation, indpb=0.3)
+#toolbox.register("mate", tools.cxUniform, indpb=0.8)
+toolbox.register("mate", tools.cxSimulatedBinaryBounded, eta=0.5, low=list(map(lambda x: x[0], bounds)), up=list(map(lambda x: x[1], bounds)))
+
+toolbox.register("mutate", mutationpower, indpb=0.3)
+#toolbox.register("mutate", nonUniformMutation, indpb=0.4)
+
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
@@ -373,7 +238,7 @@ def main():
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.9, mutpb=0.4, ngen=100, stats=stats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, cxpb=1, mutpb=0.3, ngen=50, stats=stats, halloffame=hof, verbose=True)
 
     print(hof[0])
 
