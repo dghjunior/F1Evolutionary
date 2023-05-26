@@ -58,8 +58,8 @@ fclose('all') ;
 
 %% Track file selection
 
-filename = 'Resources/Autodromo Nazionale Monza.xlsx' ;
-%filename = 'Spa-Francorchamps.xlsx' ;
+%filename = 'Resources/Autodromo Nazionale Monza.xlsx' ;
+filename = 'Spa-Francorchamps.xlsx' ;
 % filename = 'Monza Data.csv' ;
 % filename = 'OpenTRACK Laguna Seca Data.csv' ;
 % filename = 'OpenTRACK Paul Ricard Data.csv' ;
